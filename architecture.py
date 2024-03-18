@@ -171,18 +171,18 @@ class Unetv2(nn.Module):
     ('relu1', nn.ReLU()),
     ('upsample1', nn.Upsample(scale_factor=2, mode='nearest')),
 
-    ('conv2', nn.Conv2d(67, 66, kernel_size=3, stride=1, padding=1)),
+    ('conv2', nn.Conv2d(134, 134, kernel_size=3, stride=1, padding=1)),
     ('relu2', nn.ReLU()),
-    ('conv3', nn.Conv2d(66, 66, kernel_size=3, stride=1, padding=1)),
+    ('conv3', nn.Conv2d(134, 134, kernel_size=3, stride=1, padding=1)),
     ('relu3', nn.ReLU()),
     ('upsample2', nn.Upsample(scale_factor=2, mode='nearest')),
 
-    ('conv4', nn.Conv2d(66, 66, kernel_size=3, stride=1, padding=1)),
+    ('conv4', nn.Conv2d(200, 200, kernel_size=3, stride=1, padding=1)),
     ('relu4', nn.ReLU()),
-    ('conv5', nn.Conv2d(66, 66, kernel_size=3, stride=1, padding=1)),
+    ('conv5', nn.Conv2d(200, 200, kernel_size=3, stride=1, padding=1)),
     ('relu5', nn.ReLU()),
     ('upsample3', nn.Upsample(scale_factor=2, mode='nearest')),
-    ('conv6', nn.Conv2d(66, 64, kernel_size=3, stride=1, padding=1)),
+    ('conv6', nn.Conv2d(200, 64, kernel_size=3, stride=1, padding=1)),
     ("relu6",nn.ReLU()),
     ('conv7', nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1)),
     ('sigmoid', nn.Sigmoid())
@@ -257,7 +257,7 @@ class Unetv2(nn.Module):
                     if not self.quiet:
                         print(x.size())
                         print(skip_connections[-(skipnum)].size())
-                    x = torch.cat((x, skip_connections[-(skipnum)]), dim=0)  # Concatenate with skip connection
+                    x = torch.cat((x, skip_connections[-(skipnum)]), dim=1)  # changed dim=0 to dim=1
                     x = layer(x)
                     
                     skipnum += 1
@@ -268,7 +268,7 @@ class Unetv2(nn.Module):
 
             if not self.quiet:
                 print(f"{layer.__class__.__name__} Output Size:", x.size())
-
+        print("Done!")
         return x
 
 
@@ -279,5 +279,5 @@ if __name__ == "__main__":
         myUnet = Unetv2()
         myUnet.eval()
         myUnet.to("mps")
-        myUnet(torch.randn(64,3,640,480).to("mps"), torch.randn(64,784).to("mps"))
+        myUnet(torch.randn(32,3,640,480).to("mps"), torch.randn(32,784).to("mps"))
         print("Done!")

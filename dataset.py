@@ -57,7 +57,7 @@ def get_val_dataset():
                             transform=transforms)
     return dataset
 
-def get_dataloader(dataset, batch_size=64):
+def get_dataloader(dataset, batch_size=32):
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":
