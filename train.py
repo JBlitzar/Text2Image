@@ -63,6 +63,9 @@ for i in trange(EPOCHS):
                 assert abs(torch.min(result)-torch.max(result)) > 0
             except AssertionError:
                 print("\nAssertion failed: assert abs(torch.min(result)-torch.max(result)) > 0\n")
+        # if idx % 300 == 0:
+        #     os.system("git commit -m 'autogit'")
+        #test
         if idx % 50 == 0:
             
             print("\nSaving checkpoint\n")
