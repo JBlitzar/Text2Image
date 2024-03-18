@@ -58,9 +58,10 @@ for i in trange(EPOCHS):
         loss.backward()
         pbar.set_description(desc+" | step")
         optimizer.step()
-        
+        if idx % 10 == 0:
+            assert torch.max(result) > 0
         if idx % 50 == 0:
-            assert np.max(most_recent_run_imgs) > 0
+            
             print("EIEIEIE")
             os.remove(f"train_imgs/{i}_generated.png")
             Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
