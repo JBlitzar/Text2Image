@@ -15,7 +15,7 @@ device = "cpu"
 if torch.backends.mps.is_available():
     device = "mps"
 
-dataloader = get_dataloader(get_train_dataset())
+dataloader = get_dataloader(get_train_dataset(), batch_size=1) # memory
 
 
 net = Unetv2()
@@ -33,24 +33,32 @@ for i in trange(EPOCHS):
     pbar = tqdm(dataloader)
     current_loss = 0
     most_recent_run_imgs = None
-    for image_batch, prompt_batch in pbar:
+
+
+    for image_batch, prompt_batch, idx in pbar:
+        optimizer.zero_grad()
         desc = f"Loss: {round(current_loss,4)}"
-        pbar.set_description(desc+" | prep | ")
+        pbar.set_description(desc+" | prep")
 
         prompt_batch = prompt_batch.to(device)
         image_batch = image_batch.to(device)
-        pbar.set_description(desc+" | eval | ")
+        pbar.set_description(desc+" | eval")
         result = run_ddpm(net, prompt_batch, image_batch, device=device)
-        most_recent_run_imgs = result.detach().clone().numpy().astype(np.uint8)
-        pbar.set_description(desc+" | loss | ")
+        most_recent_run_imgs = result.to("cpu").detach().clone().numpy().astype(np.uint8)
+        pbar.set_description(desc+" | loss")
         loss = criterion(result, image_batch).to(device)
-        pbar.set_description(desc+" | back | ")
+        pbar.set_description(desc+" | back")
         loss.backward()
-        pbar.set_description(desc+" | step | ")
+        pbar.set_description(desc+" | step")
         optimizer.step()
+        
+        if idx % 50 == 0:
+            Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
+            torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
+            
     
-    Image.fromarray(most_recent_run_imgs[0]).save(f"train_imgs/{i}_generated.png")
-    torch.save(net.state_dict(), f"epoch_{i}_{PATH}")
+    Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
+    torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
 
     
 

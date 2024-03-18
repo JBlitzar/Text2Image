@@ -268,7 +268,8 @@ class Unetv2(nn.Module):
 
             if not self.quiet:
                 print(f"{layer.__class__.__name__} Output Size:", x.size())
-        print("Done!")
+        if not self.quiet:
+            print("Done!")
         return x
 
 

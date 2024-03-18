@@ -36,7 +36,7 @@ class VectorizedCocoCaptionsDataset(Dataset):
         captions_vectorized = torch.Tensor([list(vectorize_text_with_bert(caption)) for caption in descriptions])
         new_item = torch.sum(captions_vectorized, 0)/len(descriptions)
 
-        return image, new_item
+        return image, new_item, idx
 
 
 def get_train_dataset():
@@ -57,7 +57,7 @@ def get_val_dataset():
                             transform=transforms)
     return dataset
 
-def get_dataloader(dataset, batch_size=32):
+def get_dataloader(dataset, batch_size=64):
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":
