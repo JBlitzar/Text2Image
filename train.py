@@ -9,7 +9,8 @@ from ddpm import run_ddpm
 from tqdm import tqdm, trange
 import numpy as np
 from PIL import Image
-
+from torch.utils.tensorboard import SummaryWriter
+import os
 
 device = "cpu"
 if torch.backends.mps.is_available():
@@ -29,34 +30,44 @@ criterion = nn.MSELoss()
 
 EPOCHS = 50
 PATH = "checkpoint.pt"
+writer = None
 for i in trange(EPOCHS):
     pbar = tqdm(dataloader)
     current_loss = 0
     most_recent_run_imgs = None
 
-
+    running_sum = 0
     for image_batch, prompt_batch, idx in pbar:
         optimizer.zero_grad()
         desc = f"Loss: {round(current_loss,4)}"
+        
         pbar.set_description(desc+" | prep")
 
         prompt_batch = prompt_batch.to(device)
         image_batch = image_batch.to(device)
         pbar.set_description(desc+" | eval")
         result = run_ddpm(net, prompt_batch, image_batch, device=device)
-        most_recent_run_imgs = result.to("cpu").detach().clone().numpy().astype(np.uint8)
+        most_recent_run_imgs = result.to("cpu").detach().clone().numpy().astype(np.uint8) * 255
         pbar.set_description(desc+" | loss")
         loss = criterion(result, image_batch).to(device)
+        current_loss = loss.item()
+        running_sum += current_loss
         pbar.set_description(desc+" | back")
         loss.backward()
         pbar.set_description(desc+" | step")
         optimizer.step()
         
         if idx % 50 == 0:
+            print("EIEIEIE")
+            os.remove(f"train_imgs/{i}_generated.png")
             Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
             torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
-            
-    
+    if not writer:
+        writer = SummaryWriter()
+
+    writer.add_scalar("Loss/train", running_sum/(len(dataloader)), i) 
+
+    os.remove(f"train_imgs/{i}_generated.png")
     Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
     torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
 
