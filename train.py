@@ -60,6 +60,7 @@ for i in trange(EPOCHS):
         optimizer.step()
         
         if idx % 50 == 0:
+            assert np.max(most_recent_run_imgs) > 0
             print("EIEIEIE")
             os.remove(f"train_imgs/{i}_generated.png")
             Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
