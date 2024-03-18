@@ -1,4 +1,3 @@
-from architecture import Unet
 import torch
 
 def noop(**kwargs):
