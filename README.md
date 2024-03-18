@@ -22,6 +22,7 @@
   - U-net architecture: image goes down, image goes up, skip connections BUT with the skip connections, the prompt is injected throughout.
   - See https://en.wikipedia.org/wiki/Diffusion_model#Choice_of_architecture
   - We dont need those weird “t2i adapters”
+    ![](https://www.researchgate.net/publication/368572081/figure/fig1/AS:11431281120695577@1676603550379/The-overall-architecture-is-composed-of-two-parts-1-a-pre-trained-stable-diffusion.png)
 
 - Train
   - Get text, tokenize, vectorize (bert), run through model (iteratively, ~20 steps, implement in the forward function), compare generated image with ground truth image
