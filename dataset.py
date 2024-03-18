@@ -22,7 +22,7 @@ class VectorizedCocoCaptionsDataset(Dataset):
         self.transform = transform
         self._dataset = dset.CocoCaptions(root = root,
                             annFile = annFile,
-                            transform=transforms)
+                            transform=transform)
 
     def __len__(self):
         return self._dataset.__len__()
@@ -36,7 +36,7 @@ class VectorizedCocoCaptionsDataset(Dataset):
         captions_vectorized = torch.Tensor([list(vectorize_text_with_bert(caption)) for caption in descriptions])
         new_item = torch.sum(captions_vectorized, 0)/len(descriptions)
     
-        if image:
+        if self.transform and torch.max(image) > 1:
             image = self.transform(image)
 
         return image, new_item
