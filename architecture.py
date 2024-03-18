@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 class Unet(nn.Module):
     def __init__(self):
-        self.quiet = False
+        self.quiet = True
         super(Unet, self).__init__()
 
         #https://www.desmos.com/calculator/jbopjvrrmj
@@ -55,30 +55,33 @@ class Unet(nn.Module):
     ('sigmoid', nn.Sigmoid())
 ]))
     def tile_prompt(self, prompt_tensor, desired_shape): # by chatgpt, edited by me
+        def _print(item):
+            if not self.quiet:
+                print(item)
         desired_shape = list(desired_shape)
-        print(desired_shape)
+        _print(desired_shape)
 
 
         num_channels = desired_shape[1]
         #num_channels = 1 # desired_shape[1] # 
         desired_shape[1] = num_channels 
-        print(desired_shape)
+        _print(desired_shape)
         
         dividend = (num_channels*desired_shape[2]*desired_shape[3]) # *desired_shape[0]
         divisor = prompt_tensor.size(1)
-        print(dividend)
-        print(divisor)
+        _print(dividend)
+        _print(divisor)
 
         repeat_times = dividend // divisor
-        print(repeat_times)
+        _print(repeat_times)
         
         #tiled_tensor = prompt_tensor.repeat(repeat_times,1)
         remainder = dividend % divisor
-        print(remainder)
+        _print(remainder)
         # Repeat the prompt_tensor as required
         
         tiled_tensor = prompt_tensor.repeat(1,repeat_times)
-        print(tiled_tensor.size())
+        _print(tiled_tensor.size())
         if remainder != 0:
             tiled_tensor = torch.cat((tiled_tensor, tiled_tensor[:,:remainder]), dim=1)
 
@@ -136,4 +139,5 @@ if __name__ == "__main__":
     with torch.no_grad():
         myUnet = Unet()
         myUnet.eval()
+        myUnet
         myUnet(torch.randn(64,3,640,480), torch.randn(64,784))
