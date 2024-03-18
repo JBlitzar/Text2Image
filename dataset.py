@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 transforms = v2.Compose([
     v2.PILToTensor(),
     v2.RandomHorizontalFlip(p=0.5),
+    v2.Resize((640,480)),
     v2.ToDtype(torch.float32, scale=True),
     v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
@@ -33,7 +34,7 @@ def get_dataloader(dataset, batch_size=64):
 if __name__ == "__main__":
     cap = get_train_dataset()
     print('Number of samples: ', len(cap))
-    img, target = cap[3] # load 4th sample
+    img, target = cap[4] # load 4th sample
 
     print("Image Size: ", img.size())
     print(target)
