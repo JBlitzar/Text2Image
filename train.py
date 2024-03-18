@@ -37,7 +37,8 @@ for i in trange(EPOCHS):
     most_recent_run_imgs = None
 
     running_sum = 0
-    for image_batch, prompt_batch, idx in pbar:
+    idx = 0
+    for image_batch, prompt_batch in pbar:
         optimizer.zero_grad()
         desc = f"Loss: {round(current_loss,4)}"
         
@@ -47,7 +48,8 @@ for i in trange(EPOCHS):
         image_batch = image_batch.to(device)
         pbar.set_description(desc+" | eval")
         result = run_ddpm(net, prompt_batch, image_batch, device=device)
-        most_recent_run_imgs = result.to("cpu").detach().clone().numpy().astype(np.uint8) * 255
+        most_recent_run_imgs = result.to("cpu").detach().clone().numpy()* 255 
+        most_recent_run_imgs = most_recent_run_imgs.astype(np.uint8) 
         pbar.set_description(desc+" | loss")
         loss = criterion(result, image_batch).to(device)
         current_loss = loss.item()
@@ -62,6 +64,7 @@ for i in trange(EPOCHS):
             os.remove(f"train_imgs/{i}_generated.png")
             Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
             torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
+        idx += 1
     if not writer:
         writer = SummaryWriter()
 
