@@ -81,7 +81,3 @@ for i in trange(EPOCHS):
     os.remove(f"train_imgs/{i}_generated.png")
     Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
     torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
-
-    
-
-#test
