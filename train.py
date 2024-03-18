@@ -23,7 +23,7 @@ net = Unetv2()
 net.to(device)
 net.train()
 
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 
 optimizer = Adam(net.parameters(), lr=LEARNING_RATE)
 criterion = nn.MSELoss()
