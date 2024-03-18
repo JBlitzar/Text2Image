@@ -35,19 +35,19 @@ for i in trange(EPOCHS):
         desc = f"Loss: {round(current_loss,4)}"
         pbar.set_description(desc+" | prep | ")
 
-        #TODO: remove ugly list casting, pre-cache vectorized text
-        averaged_vectorizd_prompts = []
-        for captions in prompt_batch:
-            captions_vectorized = torch.Tensor([list(vectorize_text_with_bert(caption)) for caption in captions])
-            new_item = torch.sum(captions_vectorized, 0)/len(captions)
-            averaged_vectorizd_prompts.append(new_item)
+        # #TODO: remove ugly list casting, pre-cache vectorized text
+        # averaged_vectorizd_prompts = []
+        # for captions in prompt_batch:
+        #     captions_vectorized = torch.Tensor([list(vectorize_text_with_bert(caption)) for caption in captions])
+        #     new_item = torch.sum(captions_vectorized, 0)/len(captions)
+        #     averaged_vectorizd_prompts.append(new_item)
             
-        averaged_vectorizd_prompts = torch.cat(averaged_vectorizd_prompts, dim=0)
+        # averaged_vectorizd_prompts = torch.cat(averaged_vectorizd_prompts, dim=0)
 
-        averaged_vectorizd_prompts = averaged_vectorizd_prompts.to(device)
+        prompt_batch = prompt_batch.to(device)
         image_batch = image_batch.to(device)
         pbar.set_description(desc+" | eval | ")
-        result = run_ddpm(net, averaged_vectorizd_prompts, image_batch, device=device)
+        result = run_ddpm(net, prompt_batch, image_batch, device=device)
         pbar.set_description(desc+" | loss | ")
         loss = criterion(result, image_batch).to(device)
         pbar.set_description(desc+" | back | ")

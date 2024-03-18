@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 class Unet(nn.Module):
     def __init__(self):
-        self.quiet = True
+        self.quiet = False
         super(Unet, self).__init__()
 
         #https://www.desmos.com/calculator/jbopjvrrmj
@@ -19,13 +19,13 @@ class Unet(nn.Module):
     ('relu2', nn.ReLU()),
     ('pool1', nn.MaxPool2d(kernel_size=2, stride=2)), # 64x640x484 -> 32x640x484 
 
-    ('conv3', nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)),
+    ('conv3', nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1)),
     ('relu3', nn.ReLU()),
     ('conv4', nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1)),
     ('relu4', nn.ReLU()),
     ('pool2', nn.MaxPool2d(kernel_size=2, stride=2)),
 
-    ('conv5', nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)),
+    ('conv5', nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)),
     ('relu5', nn.ReLU()),
     ('conv6', nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)),
     ('relu6', nn.ReLU()),
@@ -34,7 +34,7 @@ class Unet(nn.Module):
 
         # Decoder layers
         self.decoder = nn.Sequential(OrderedDict([
-    ('conv1', nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)),
+    ('conv1', nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)),
     ('relu1', nn.ReLU()),
     ('upsample1', nn.Upsample(scale_factor=2, mode='nearest')),
 
@@ -44,7 +44,7 @@ class Unet(nn.Module):
     ('relu3', nn.ReLU()),
     ('upsample2', nn.Upsample(scale_factor=2, mode='nearest')),
 
-    ('conv4', nn.Conv2d(384, 128, kernel_size=3, stride=1, padding=1)),
+    ('conv4', nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1)),
     ('relu4', nn.ReLU()),
     ('conv5', nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1)),
     ('relu5', nn.ReLU()),
@@ -55,23 +55,36 @@ class Unet(nn.Module):
     ('sigmoid', nn.Sigmoid())
 ]))
     def tile_prompt(self, prompt_tensor, desired_shape): # by chatgpt, edited by me
-        
+        desired_shape = list(desired_shape)
+        print(desired_shape)
+
+
         num_channels = desired_shape[1]
+        #num_channels = 1 # desired_shape[1] # 
+        desired_shape[1] = num_channels 
+        print(desired_shape)
         
-        dividend = (num_channels*desired_shape[0]*desired_shape[2]*desired_shape[3])
-        divisor = prompt_tensor.size(0)
+        dividend = (num_channels*desired_shape[2]*desired_shape[3]) # *desired_shape[0]
+        divisor = prompt_tensor.size(1)
+        print(dividend)
+        print(divisor)
 
         repeat_times = dividend // divisor
+        print(repeat_times)
         
-
-        tiled_tensor = prompt_tensor.repeat(repeat_times,1)
+        #tiled_tensor = prompt_tensor.repeat(repeat_times,1)
         remainder = dividend % divisor
-        tiled_tensor = torch.cat((tiled_tensor, tiled_tensor[:,:remainder]), dim=1)
+        print(remainder)
+        # Repeat the prompt_tensor as required
         
+        tiled_tensor = prompt_tensor.repeat(1,repeat_times)
+        print(tiled_tensor.size())
+        if remainder != 0:
+            tiled_tensor = torch.cat((tiled_tensor, tiled_tensor[:,:remainder]), dim=1)
 
         tiled_tensor = tiled_tensor.view(*desired_shape)
         
-        assert tuple(tiled_tensor.size()) == desired_shape
+        assert list(tuple(tiled_tensor.size())) == desired_shape
 
         return tiled_tensor
     def forward(self, x, prompt):
