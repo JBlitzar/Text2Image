@@ -21,51 +21,52 @@ class VAE(nn.Module):
         super(VAE, self).__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2), # now its 320x240
 
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2), # now its 160x120
 
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2), # now its 80x60
 
             # how to get to 64x64?
             Resize(size=(64,64)),
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
 
         )
         self.decoder = nn.Sequential(
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             Resize(size=(80,60)), 
 
             nn.Upsample(scale_factor=2, mode='nearest'),  #now 160x120
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
+            nn.ReLU(),
             
             nn.Upsample(scale_factor=2, mode='nearest'),  
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
+            nn.ReLU(),
             
             nn.Upsample(scale_factor=2, mode='nearest'),  
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
+            nn.ReLU(),
+            nn.Tanh()
         )
     def forward(self,x):
         x = self.encoder(x)
