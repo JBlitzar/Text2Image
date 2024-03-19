@@ -29,6 +29,9 @@ criterion = nn.MSELoss()
 EPOCHS = 50
 PATH = "checkpoint.pt"
 writer = None
+
+#net.load_state_dict(torch.load("ckpt/epoch_0_checkpoint.pt"))
+
 for i in trange(EPOCHS):
     pbar = tqdm(dataloader)
     current_loss = 0
@@ -62,7 +65,7 @@ for i in trange(EPOCHS):
         optimizer.step()
 
 
-        if idx % 50 == 0:
+        if idx % 500 == 0:
             
             print("\nSaving checkpoint\n")
             save_side_by_side_image(np.transpose(most_recent_run_imgs[0],(1,2,0)),np.transpose(last_img_batch[0],(1,2,0)), f"train_imgs/{i}_{idx}_generated.png")
