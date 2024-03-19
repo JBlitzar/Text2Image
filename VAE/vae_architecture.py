@@ -47,7 +47,11 @@ class VAE(nn.Module):
         self.decoder = nn.Sequential(
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
             nn.LeakyReLU(),
+<<<<<<< HEAD
             Resize(size=(60,80)), 
+=======
+            Resize(size=(80,60)), 
+>>>>>>> parent of 570b1fa (relu not leakyrelu)
 
             nn.Upsample(scale_factor=2, mode='nearest'),  #now 160x120
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
@@ -65,7 +69,11 @@ class VAE(nn.Module):
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
             nn.LeakyReLU(),
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
+<<<<<<< HEAD
             nn.LeakyReLU()
+=======
+            nn.LeakyReLU(),
+>>>>>>> parent of 570b1fa (relu not leakyrelu)
         )
     def forward(self,x):
         _print = self._print
