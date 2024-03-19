@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 import glob
 from PIL import Image
+
 print("VAE dataset loaded.")
 
 transforms = v2.Compose([
@@ -32,9 +33,7 @@ class VAECocoCaptionsDataset(Dataset):
             idx = idx.tolist()
 
         image, _ = self._dataset[idx]
-
         
-    
         if self.transform and torch.max(image) > 1:
             image = self.transform(image)
 
