@@ -47,7 +47,7 @@ class VAE(nn.Module):
         self.decoder = nn.Sequential(
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            Resize(size=(80,60)), 
+            Resize(size=(60,80)), 
 
             nn.Upsample(scale_factor=2, mode='nearest'),  #now 160x120
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
@@ -81,5 +81,5 @@ if __name__ == "__main__":
         net = VAE()
         net.eval()
         net.to("mps")
-        net(torch.randn(64,3,640,480).to("mps"))
+        net(torch.randn(64,3,480,640).to("mps"))
         print("Done!")
