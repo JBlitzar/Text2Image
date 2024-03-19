@@ -8,7 +8,10 @@ class Resize(nn.Module):
         super(Resize, self).__init__()
         self.size = size
 
-   
+    def forward_oneimg(self, x):
+        result = F.interpolate(x, size=self.size)
+        
+        return result
     def forward(self, x):
         return torch.cat([self.forward_oneimg(a) for a in torch.split(x, 1, dim=0)], dim=0)
 class VAE(nn.Module):

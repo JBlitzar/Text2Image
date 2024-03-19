@@ -30,7 +30,7 @@ EPOCHS = 50
 PATH = "checkpoint.pt"
 writer = None
 
-net.load_state_dict(torch.load("ckpt/epoch_0_checkpoint.pt"))
+#net.load_state_dict(torch.load("ckpt/epoch_0_checkpoint.pt"))
 
 for i in trange(EPOCHS):
     pbar = tqdm(dataloader)
