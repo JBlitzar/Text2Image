@@ -38,41 +38,49 @@ for i in trange(EPOCHS):
 
     running_sum = 0
     idx = 0
-    for image_batch, prompt_batch in pbar:
-        optimizer.zero_grad()
-        desc = f"Loss: {round(current_loss,4)}"
-        
-        pbar.set_description(desc+" | prep")
-
-        prompt_batch = prompt_batch.to(device)
-        image_batch = image_batch.to(device)
-        pbar.set_description(desc+" | eval")
-        result = run_ddpm(net, prompt_batch, image_batch, device=device)
-        most_recent_run_imgs = result.to("cpu").detach().clone().numpy()* 255 
-        most_recent_run_imgs = most_recent_run_imgs.astype(np.uint8) 
-        pbar.set_description(desc+" | loss")
-        loss = criterion(result, image_batch).to(device)
-        current_loss = loss.item()
-        running_sum += current_loss
-        pbar.set_description(desc+" | back")
-        loss.backward()
-        pbar.set_description(desc+" | step")
-        optimizer.step()
-        if idx % 10 == 0:
-            try:
-                assert abs(torch.min(result)-torch.max(result)) > 0
-            except AssertionError:
-                print("\nAssertion failed: assert abs(torch.min(result)-torch.max(result)) > 0\n")
-        # if idx % 300 == 0:
-        #     os.system("git commit -m 'autogit'")
-        #test
-        if idx % 50 == 0:
+    with torch.profiler.profile(
+            schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
+            on_trace_ready=torch.profiler.tensorboard_trace_handler('./runs'),
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True
+    ) as prof:
+        prof.step()
+        for image_batch, prompt_batch in pbar:
+            optimizer.zero_grad()
+            desc = f"Loss: {round(current_loss,4)}"
             
-            print("\nSaving checkpoint\n")
+            pbar.set_description(desc+" | prep")
 
-            Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_{idx}_generated.png")
-            torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
-        idx += 1
+            prompt_batch = prompt_batch.to(device)
+            image_batch = image_batch.to(device)
+            pbar.set_description(desc+" | eval")
+            result = run_ddpm(net, prompt_batch, image_batch, device=device)
+            most_recent_run_imgs = result.to("cpu").detach().clone().numpy()* 255 
+            most_recent_run_imgs = most_recent_run_imgs.astype(np.uint8) 
+            pbar.set_description(desc+" | loss")
+            loss = criterion(result, image_batch).to(device)
+            current_loss = loss.item()
+            running_sum += current_loss
+            pbar.set_description(desc+" | back")
+            loss.backward()
+            pbar.set_description(desc+" | step")
+            optimizer.step()
+            if idx % 10 == 0:
+                try:
+                    assert abs(torch.min(result)-torch.max(result)) > 0
+                except AssertionError:
+                    print("\nAssertion failed: assert abs(torch.min(result)-torch.max(result)) > 0\n")
+            # if idx % 300 == 0:
+            #     os.system("git commit -m 'autogit'")
+            #test
+            if idx % 50 == 0:
+                
+                print("\nSaving checkpoint\n")
+
+                Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_{idx}_generated.png")
+                torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
+            idx += 1
     if not writer:
         writer = SummaryWriter()
 

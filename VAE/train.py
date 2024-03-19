@@ -30,7 +30,7 @@ EPOCHS = 50
 PATH = "checkpoint.pt"
 writer = None
 
-net.load_state_dict(torch.load("ckpt/epoch_0_checkpoint.pt"))
+#net.load_state_dict(torch.load("ckpt/epoch_0_checkpoint.pt"))
 
 for i in trange(EPOCHS):
     pbar = tqdm(dataloader)
@@ -39,39 +39,47 @@ for i in trange(EPOCHS):
     last_img_batch = None
     running_sum = 0
     idx = 0
-    for image_batch in pbar:
-        last_img_batch = image_batch.to("cpu").detach().clone().numpy() * 255 
-        last_img_batch = last_img_batch.astype(np.uint8)
-        optimizer.zero_grad()
-        desc = f"Loss: {round(current_loss,4)}"
-        
-        pbar.set_description(desc+" | prep")
-
-        
-        image_batch = image_batch.to(device)
-        pbar.set_description(desc+" | eval")
-
-        result = net(image_batch)
-
-        most_recent_run_imgs = result.to("cpu").detach().clone().numpy()* 255 
-        most_recent_run_imgs = most_recent_run_imgs.astype(np.uint8) 
-        pbar.set_description(desc+" | loss")
-        loss = criterion(result, image_batch).to(device)
-        current_loss = loss.item()
-        running_sum += current_loss
-        pbar.set_description(desc+" | back")
-        loss.backward()
-        pbar.set_description(desc+" | step")
-        optimizer.step()
-
-
-        if idx % 500 == 0:
+    with torch.profiler.profile(
+            schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
+            on_trace_ready=torch.profiler.tensorboard_trace_handler('./runs'),
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True
+    ) as prof:
+        for image_batch in pbar:
+            prof.step()
+            last_img_batch = image_batch.to("cpu").detach().clone().numpy() * 255 
+            last_img_batch = last_img_batch.astype(np.uint8)
+            optimizer.zero_grad()
+            desc = f"Loss: {round(current_loss,4)}"
             
-            print("\nSaving checkpoint\n")
-            save_side_by_side_image(np.transpose(most_recent_run_imgs[0],(1,2,0)),np.transpose(last_img_batch[0],(1,2,0)), f"train_imgs/{i}_{idx}_generated.png")
+            pbar.set_description(desc+" | prep")
+
             
-            torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
-        idx += 1
+            image_batch = image_batch.to(device)
+            pbar.set_description(desc+" | eval")
+
+            result = net(image_batch)
+
+            most_recent_run_imgs = result.to("cpu").detach().clone().numpy()* 255 
+            most_recent_run_imgs = most_recent_run_imgs.astype(np.uint8) 
+            pbar.set_description(desc+" | loss")
+            loss = criterion(result, image_batch).to(device)
+            current_loss = loss.item()
+            running_sum += current_loss
+            pbar.set_description(desc+" | back")
+            loss.backward()
+            pbar.set_description(desc+" | step")
+            optimizer.step()
+
+
+            if idx % 500 == 0:
+                
+                print("\nSaving checkpoint\n")
+                save_side_by_side_image(np.transpose(most_recent_run_imgs[0],(1,2,0)),np.transpose(last_img_batch[0],(1,2,0)), f"train_imgs/{i}_{idx}_generated.png")
+                
+                torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
+            idx += 1
     if not writer:
         writer = SummaryWriter()
 
