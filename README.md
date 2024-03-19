@@ -32,3 +32,10 @@
   - Essentially step 4 with many different hyperparameter configurations, make sure to have train/test/val
 - Running
   - Get text, vectorize (bert), then run thru model
+
+okay heres how stable diffusion works
+theres this VAE, and it learns to put big images as 3x64x64 latent space
+train that, and THEN start with your diffusion model
+You do your iterative denoising with the following model:
+half of vae compresses down, unet with resnet architecture, half of vae compresses up
+prompt is concatenated in the latent space
