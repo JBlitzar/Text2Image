@@ -14,7 +14,7 @@ class Resize(nn.Module):
         return result
     def forward(self, x):
         return torch.cat([self.forward_oneimg(a) for a in torch.split(x, 1, dim=0)], dim=0)
-class VAE(nn.Module):
+class Autoencoder(nn.Module):
     def _print(self, item):
         if self.debug:
             print(item)
@@ -22,7 +22,7 @@ class VAE(nn.Module):
         #compresses 3x640x480 to 3x64x64
         self.debug = False
         self._print("Running VAE")
-        super(VAE, self).__init__()
+        super(Autoencoder, self).__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
@@ -52,6 +52,70 @@ class VAE(nn.Module):
             nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             #Resize(size=(80,60)), 
+
+            nn.Upsample(scale_factor=2, mode='nearest'),  #now 160x120
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
+            nn.ReLU(),
+            
+            nn.Upsample(scale_factor=2, mode='nearest'),  
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
+            nn.ReLU(),
+            
+            nn.Upsample(scale_factor=2, mode='nearest'),  
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
+            nn.ReLU(),
+            nn.Tanh()
+        )
+    def forward(self,x):
+        x = self.encoder(x)
+        self._print(f"Encoded size: {x.size()}")
+        if self.debug:
+            assert list(x.size())[1:]== [3,64,64]
+        x = self.decoder(x)
+        return x
+    
+class VAE(nn.Module):
+    def _print(self, item):
+        if self.debug:
+            print(item)
+    def __init__(self):
+        #compresses 3x640x480 to 3x64x64
+        self.debug = False
+        self._print("Running VAE")
+        super(VAE, self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2), # now its 320x240
+
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2), # now its 160x120
+
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2), # now its 80x60
+
+
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU()
+
+        )
+        self.decoder = nn.Sequential(
+            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
 
             nn.Upsample(scale_factor=2, mode='nearest'),  #now 160x120
             nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
