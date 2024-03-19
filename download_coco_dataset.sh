@@ -2,6 +2,7 @@ read -p "Continue? This is a ~25gb download (y/N) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
+    mkdir data
     cd data
     curl -o train_imgs.zip http://images.cocodataset.org/zips/train2017.zip
     curl -o val_imgs.zip http://images.cocodataset.org/zips/val2017.zip
