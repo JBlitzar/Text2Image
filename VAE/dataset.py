@@ -15,7 +15,7 @@ transforms = v2.Compose([
     #v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
-class VectorizedCocoCaptionsDataset(Dataset):
+class VAECocoCaptionsDataset(Dataset):
     def __init__(self, root, annFile, transform=None):
         self.root = root
         self.annFile = annFile
@@ -42,19 +42,19 @@ class VectorizedCocoCaptionsDataset(Dataset):
 
 
 def get_train_dataset():
-    dataset = VectorizedCocoCaptionsDataset(root = '../data/train2017',
+    dataset = VAECocoCaptionsDataset(root = '../data/train2017',
                             annFile = '../data/annotations/captions_train2017.json',
                             transform=transforms)
     return dataset
 
 def get_test_dataset():
-    dataset = VectorizedCocoCaptionsDataset(root = '../data/test2017',
+    dataset = VAECocoCaptionsDataset(root = '../data/test2017',
                             annFile = 'data/annotations/captions_test2017.json',
                             transform=transforms)
     return dataset
 
 def get_val_dataset():
-    dataset = VectorizedCocoCaptionsDataset(root = '../data/val2017',
+    dataset = VAECocoCaptionsDataset(root = '../data/val2017',
                             annFile = 'data/annotations/captions_val2017.json',
                             transform=transforms)
     return dataset
