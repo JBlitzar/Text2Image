@@ -7,10 +7,13 @@ import glob
 from PIL import Image
 print("VAE dataset loaded.")
 
+
+
 transforms = v2.Compose([
     v2.PILToTensor(),
     v2.RandomHorizontalFlip(p=0.5),
     v2.Resize((480,640)),
+    
     v2.ToDtype(torch.float32, scale=True),
     #v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
@@ -33,7 +36,7 @@ class VAECocoCaptionsDataset(Dataset):
 
         image, _ = self._dataset[idx]
         image = torch.rot90(image, dims=(1,2))
-        
+        image = v2.functional.crop(image, 0,80,480,480)
     
         if self.transform and torch.max(image) > 1:
             image = self.transform(image)
