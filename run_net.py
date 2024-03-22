@@ -1,5 +1,5 @@
 import torch
-
+import torchvision.transforms.v2 as v2
 def noop(**kwargs):
     pass
 
@@ -12,8 +12,9 @@ def run_ddpm(net, prompts, images=None, iterations=10, callback=noop, device="cp
     cur_images = cur_images.to(device)
     for i in range(iterations):
         cur_images = net(cur_images, prompts)
-    return cur_images
+    return cur_images, images
 
 def run_naive(net, prompts, images=None, device="cpu", callback=noop, *argv):
-    images = net(prompts)
-    return images
+    results = net(prompts)
+    images = v2.functional.crop(images, 0,80,480,480)
+    return results, images

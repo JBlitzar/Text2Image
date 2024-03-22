@@ -3,7 +3,7 @@ import torch
 from dataset import get_train_dataset, get_dataloader
 from bert_vectorize import vectorize_text_with_bert
 from torch.optim import Adam
-from architecture import Unetv2
+from architecture import Unetv2, NaiveCNN
 import torch.nn as nn
 from run_net import run_ddpm
 from tqdm import tqdm, trange
@@ -16,10 +16,10 @@ device = "cpu"
 if torch.backends.mps.is_available():
     device = "mps"
 
-dataloader = get_dataloader(get_train_dataset(), batch_size=2) # memory, batch size 8 works
+dataloader = get_dataloader(get_train_dataset(), batch_size=32) # memory, batch size 8 works
 
 
-net = Unetv2()
+net = NaiveCNN(device=device)#Unetv2()
 net.to(device)
 net.train()
 
@@ -55,11 +55,16 @@ for i in trange(EPOCHS):
             prompt_batch = prompt_batch.to(device)
             image_batch = image_batch.to(device)
             pbar.set_description(desc+" | eval")
-            result = run_ddpm(net, prompt_batch, image_batch, device=device)
+
+
+            result, _image_batch = run_naive(net, prompt_batch, image_batch, device=device)#run_ddpm(net, prompt_batch, image_batch, device=device)
+
+
+
             most_recent_run_imgs = result.to("cpu").detach().clone().numpy()* 255 
             most_recent_run_imgs = most_recent_run_imgs.astype(np.uint8) 
             pbar.set_description(desc+" | loss")
-            loss = criterion(result, image_batch).to(device)
+            loss = criterion(result, _image_batch).to(device)
             current_loss = loss.item()
             running_sum += current_loss
             pbar.set_description(desc+" | back")

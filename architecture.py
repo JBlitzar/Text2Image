@@ -274,7 +274,9 @@ class Unetv2(nn.Module):
         return x
 
 class NaiveCNN(nn.Module):
-    def __init__(self):
+    def __init__(self, device="cpu"):
+        print("Running naivecnn")
+        self.device = device
         super().__init__()
         self._resizeto480x480 = v2.Resize((480,480))
         self.decoder = nn.Sequential(
@@ -310,8 +312,13 @@ class NaiveCNN(nn.Module):
 
         )
     def forward(self, x):
+        #print(x.shape)
         batch = x.size(0)
+        
+        x = torch.cat((x, torch.zeros(x.size(0), 16).to(self.device)), dim=1)
         x = x.view(batch, 28, 28)
+        x = x.unsqueeze(1)
+        #print(x.shape)
         x = self.decoder(x)
         x = self._resizeto480x480(x)
         return x
