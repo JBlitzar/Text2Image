@@ -1,5 +1,5 @@
 # Text2Image
-
+https://scholar.harvard.edu/files/binxuw/files/stable_diffusion_a_tutorial.pdf
 - Dataset:
 
   - Conceptual captions: https://ai.google.com/research/ConceptualCaptions/download (waaaay big, images not included (its links), and some broken links)

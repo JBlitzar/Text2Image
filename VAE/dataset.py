@@ -8,6 +8,8 @@ from PIL import Image
 
 print("VAE dataset loaded.")
 
+
+
 transforms = v2.Compose([
     v2.PILToTensor(),
     v2.RandomHorizontalFlip(p=0.5),
