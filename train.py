@@ -1,11 +1,11 @@
-from ddpm import run_ddpm
+from run_net import run_ddpm, run_naive
 import torch
 from dataset import get_train_dataset, get_dataloader
 from bert_vectorize import vectorize_text_with_bert
 from torch.optim import Adam
 from architecture import Unetv2
 import torch.nn as nn
-from ddpm import run_ddpm
+from run_net import run_ddpm
 from tqdm import tqdm, trange
 import numpy as np
 from PIL import Image

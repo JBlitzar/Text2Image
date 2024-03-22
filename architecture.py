@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.functional as F
 from collections import OrderedDict
+from torchvision.transforms import v2
 
 class Unet(nn.Module):
     def __init__(self):
@@ -272,6 +273,48 @@ class Unetv2(nn.Module):
             print("Done!")
         return x
 
+class NaiveCNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self._resizeto480x480 = v2.Resize((480,480))
+        self.decoder = nn.Sequential(
+            nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1), # 28x28
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Upsample(scale_factor=2, mode='nearest'),
+
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),# 56x56
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Upsample(scale_factor=2, mode='nearest'),
+
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),#112x112
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Upsample(scale_factor=2, mode='nearest'),
+
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),#224x224
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Upsample(scale_factor=2, mode='nearest'),
+
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),#448x448
+            nn.ReLU(),
+            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Upsample(scale_factor=480/448, mode='nearest'),
+
+        )
+    def forward(self, x):
+        batch = x.size(0)
+        x = x.view(batch, 28, 28)
+        x = self.decoder(x)
+        x = self._resizeto480x480(x)
+        return x
 
 
 

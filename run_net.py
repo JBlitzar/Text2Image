@@ -13,3 +13,7 @@ def run_ddpm(net, prompts, images=None, iterations=10, callback=noop, device="cp
     for i in range(iterations):
         cur_images = net(cur_images, prompts)
     return cur_images
+
+def run_naive(net, prompts, images=None, device="cpu", callback=noop, *argv):
+    images = net(prompts)
+    return images

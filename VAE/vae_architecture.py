@@ -78,6 +78,9 @@ class VAE(nn.Module):
         _print(x.size())
         return x
     
+
+
+
 if __name__ == "__main__":
     with torch.no_grad():
         net = VAE(debug=True)

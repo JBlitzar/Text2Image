@@ -1,4 +1,4 @@
-from ddpm import run_ddpm
+from run_net import run_ddpm
 from architecture import Unetv2
 import numpy as np
 import torch
