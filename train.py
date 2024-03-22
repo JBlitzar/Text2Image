@@ -16,7 +16,7 @@ device = "cpu"
 if torch.backends.mps.is_available():
     device = "mps"
 
-dataloader = get_dataloader(get_train_dataset(), batch_size=32) # memory, batch size 8 works
+dataloader = get_dataloader(get_train_dataset(), batch_size=8) # memory, batch size 8 works
 
 
 net = NaiveCNN(device=device)#Unetv2()
@@ -30,6 +30,7 @@ criterion = nn.MSELoss()
 
 EPOCHS = 50
 PATH = "checkpoint.pt"
+net.load_state_dict(torch.load(f"ckpt/epoch_0_checkpoint.pt"))
 writer = None
 for i in trange(EPOCHS):
     pbar = tqdm(dataloader)
@@ -45,8 +46,9 @@ for i in trange(EPOCHS):
             profile_memory=True,
             with_stack=True
     ) as prof:
-        prof.step()
+        
         for image_batch, prompt_batch in pbar:
+            #prof.step()
             optimizer.zero_grad()
             desc = f"Loss: {round(current_loss,4)}"
             
