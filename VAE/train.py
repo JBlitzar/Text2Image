@@ -65,6 +65,5 @@ for epoch in trange(EPOCHS):
     
     if epoch % 1 == 0 :
         log_img(torchvision.utils.make_grid([last_batch, last_generated]),f"train_img/epoch_{epoch}.png")
-        #save_side_by_side_image(last_batch, last_generated, f"train_img/epoch_{epoch}.png")
         with open(f"ckpt/epoch_{epoch}.pt", "wb+") as f:
             torch.save(net.state_dict(),f)
