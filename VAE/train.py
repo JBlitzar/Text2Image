@@ -63,7 +63,7 @@ for epoch in trange(EPOCHS):
 
     log_data({"Loss/Train":running_total/num_runs,"Loss/Reconstruction":running_total_reconstruction/num_runs, "Loss/KL":running_total_kl/num_runs},epoch)
     
-    if epoch % 10 == 0 :
+    if epoch % 1 == 0 :
         log_img(torchvision.utils.make_grid([last_batch, last_generated]),f"train_img/epoch_{epoch}.png")
         #save_side_by_side_image(last_batch, last_generated, f"train_img/epoch_{epoch}.png")
         with open(f"ckpt/epoch_{epoch}.pt", "wb+") as f:
