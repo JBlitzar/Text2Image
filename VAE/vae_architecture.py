@@ -1,90 +1,140 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-print("VAE architecture loaded.")
-#test
-class Resize(nn.Module):
-    def __init__(self, size):
-        super(Resize, self).__init__()
-        self.size = size
+import numpy as np
+
+
+class ConvBlock(nn.Module):
+    def __init__(self, start, end):
+        super().__init__()
+        self.start = start
+        self.end = end
+        self.block = nn.Sequential(
+            nn.Conv2d(start, end, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(end, end, kernel_size=3, stride=1, padding=1),
+            nn.ReLU()
+        )
+    def forward(self, x):
+
+        return self.block(x)
+
+
+class Reshape(nn.Module):
+    def __init__(self, *args):
+        super(Reshape, self).__init__()
+        self.shape = args
 
     def forward(self, x):
-        return F.interpolate(x, size=self.size, mode='nearest')
+        return x.view(self.shape)
+
+
 class VAE(nn.Module):
-    def _print(self, item):
-        if self.debug:
-            print(item)
-    def __init__(self, debug=False):
-        #compresses 3x640x480 to 3x64x64
-        self.debug = debug
-        self._print("Running VAE")
-        super(VAE, self).__init__()
-        self.encoder = nn.Sequential(
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2), # now its 320x240
+    #https://www.cs.toronto.edu/~rgrosse/courses/csc421_2019/slides/lec17.pdf
 
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2), # now its 160x120
+    #https://medium.com/@rekalantar/variational-auto-encoder-vae-pytorch-tutorial-dce2d2fe0f5f
+    def __init__(self, device="cpu", encoder=nn.Sequential(), decoder=nn.Sequential(), latent_dim_num=8*8*8, before_latent_dim=16*16*16):
 
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2), # now its 80x60
+        
+        super().__init__()
+        self.device = device
+        
+        self.encoder = encoder
+        self.decoder = decoder
 
-            # how to get to 64x64?
-            Resize(size=(64,64)),
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
+        # latent mean and variance 
+        self.mean_layer = nn.Linear(before_latent_dim, latent_dim_num)
+        self.logvar_layer = nn.Linear(before_latent_dim, latent_dim_num)
 
-        )
-        self.decoder = nn.Sequential(
-            nn.Conv2d(3,3,kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-            Resize(size=(60,80)), 
+        self.expand_layer = nn.Linear(latent_dim_num,before_latent_dim)
 
-            nn.Upsample(scale_factor=2, mode='nearest'),  #now 160x120
-            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
-            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
-            
-            nn.Upsample(scale_factor=2, mode='nearest'),  
-            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
-            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
-            
-            nn.Upsample(scale_factor=2, mode='nearest'),  
-            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU(),
-            nn.Conv2d(3, 3, kernel_size=3, stride=1, padding=1), 
-            nn.LeakyReLU()
-        )
-    def forward(self,x):
-        _print = self._print
-        _print(x.size())
+    def encode(self, x):
+        #slide 22
         x = self.encoder(x)
-        _print(f"Encoded size: {x.size()}")
-        if self.debug:
-            assert list(x.size())[1:]== [3,64,64]
-        x = self.decoder(x)
-        _print(x.size())
-        return x
+        mean = self.mean_layer(x)
+        logvar = self.logvar_layer(x)
+        return mean, logvar
+
+    def reparameterization(self, mean, var):
+        epsilon = torch.randn_like(var).to(self.device)#randn does a normal distribution 
+        z = mean + var*epsilon #slide 19
+        return z
+
+    def decode(self, x):
+        return self.decoder(x)
+    
+    def forward(self, x):
+        #slide 22
+
+        # in a class-conditional vae, Y would be appended to the data here becore getting run through this half of the net
+        mean, logvar = self.encode(x)
+
+        z = self.reparameterization(mean, logvar)
+
+        z = self.expand_layer(z)
+        # in a class-conditional vae, Y would be appended to the data here becore getting run through this half of the net
+        x_hat = self.decode(z)
+        return x_hat, mean, logvar
+    
+
+def COCO_VAE_factory(device="cpu"):
+    return VAE(
+        device=device, 
+        encoder=nn.Sequential(
+            ConvBlock(3,256),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            ConvBlock(256,128),
+
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            ConvBlock(128,64),
+
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            ConvBlock(64,32),
+
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            ConvBlock(32,16),
+            
+            nn.Flatten()
+        ), 
+        decoder=nn.Sequential(
+            
+
+            Reshape(-1, 16,16,16),
+
+            ConvBlock(16,32),
+            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+
+            ConvBlock(32,64),
+            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+
+            ConvBlock(64,128),
+            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+
+            ConvBlock(128,256),
+            
+            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+            
+            nn.Conv2d(256, 3, kernel_size=3, stride=1, padding=1 ),
+            nn.Sigmoid()
+
+        ), 
+        latent_dim_num=8*8*8,
+        before_latent_dim=16*16*16
+    )
     
 
 
 
 if __name__ == "__main__":
     with torch.no_grad():
-        net = VAE(debug=True)
+        net = COCO_VAE_factory(device="mps")
         net.eval()
         net.to("mps")
-        net(torch.randn(64,3,480,640).to("mps"))
+        out, _, _= net(torch.randn(64,3,256,256).to("mps"))
+        print(out.size())
+        assert tuple(out.size()) == (64,3,256,256)
         print("Done!")

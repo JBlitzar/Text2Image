@@ -14,6 +14,8 @@ transforms = v2.Compose([
     v2.PILToTensor(),
     v2.RandomHorizontalFlip(p=0.5),
     v2.Resize((480,640)),
+    v2.CenterCrop(size=(480,480)),
+    v2.Resize((256,256)),
     v2.ToDtype(torch.float32, scale=True),
     #v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
