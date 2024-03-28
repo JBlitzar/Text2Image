@@ -125,7 +125,21 @@ def COCO_VAE_factory(device="cpu"):
         latent_dim_num=8*8*8,
         before_latent_dim=16*16*16
     )
+
+
+def vae_loss_function(inputs, results, mean, log_var):
+    batch_size = inputs.size(0)
+
+    reconstruction_loss = F.binary_cross_entropy(results, inputs, reduction='sum')
+
+    kl_divergence_loss = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=1)
+    kl_divergence_loss = torch.mean(kl_divergence_loss)
+
+    total_loss = reconstruction_loss + kl_divergence_loss
     
+    total_loss /= batch_size
+    
+    return total_loss, reconstruction_loss, kl_divergence_loss
 
 
 
