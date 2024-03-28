@@ -52,17 +52,19 @@ def get_train_dataset():
 
 def get_test_dataset():
     dataset = VAECocoCaptionsDataset(root = '../data/test2017',
-                            annFile = 'data/annotations/captions_test2017.json',
+                            annFile = '../data/annotations/captions_test2017.json',
                             transform=transforms)
     return dataset
 
 def get_val_dataset():
+
     dataset = VAECocoCaptionsDataset(root = '../data/val2017',
-                            annFile = 'data/annotations/captions_val2017.json',
+                            annFile = '../data/annotations/captions_val2017.json',
                             transform=transforms)
     return dataset
 
 def get_dataloader(dataset, batch_size=64):
+
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":

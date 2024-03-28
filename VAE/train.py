@@ -1,17 +1,17 @@
 from vae_architecture import COCO_VAE_factory,vae_loss_function
-from dataset import get_train_dataset, get_dataloader
+from dataset import get_train_dataset, get_dataloader, get_val_dataset
 import torch
 from tqdm import tqdm, trange
 from logger import log_data, init_logger, log_img
 import torchvision
 
 import os
-os.system(f"caffeinate -is -w {os.getpid()}")
+os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
-dataloader = get_dataloader(get_train_dataset())
+dataloader = get_dataloader(get_val_dataset(), batch_size=32)#get_dataloader(get_train_dataset())
 
 
 net = COCO_VAE_factory(device=device)
@@ -22,8 +22,9 @@ criterion = vae_loss_function#torch.nn.MSELoss()#torch.nn.BCELoss()#
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
 
-
-init_logger(net, next(iter(dataloader))[0].to(device), dir="runs/cocovae256")
+first_data = next(iter(dataloader))[0].to(device).unsqueeze(0)
+print(first_data.size())
+init_logger(net, first_data, dir="runs/cocovae256")
 
 
 for epoch in trange(EPOCHS):
@@ -36,7 +37,7 @@ for epoch in trange(EPOCHS):
     running_total_reconstruction = 0
     running_total_kl = 0
 
-    for batch, labels in tqdm(dataloader):
+    for batch in tqdm(dataloader):
         optimizer.zero_grad()
 
         batch = batch.to(device)
