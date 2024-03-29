@@ -16,6 +16,7 @@ dataloader = get_dataloader(get_val_dataset(), batch_size=32)#get_dataloader(get
 
 net = COCO_VAE_factory(device=device)
 net.to(device)
+net.train()
 EPOCHS = 500
 learning_rate = 0.001
 criterion = vae_loss_function#torch.nn.MSELoss()#torch.nn.BCELoss()#

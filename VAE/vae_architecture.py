@@ -94,19 +94,19 @@ def COCO_VAE_factory(device="cpu"):
 
             ConvBlock(64,32),
 
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            # nn.MaxPool2d(kernel_size=2, stride=2),
 
-            ConvBlock(32,16),
+            # ConvBlock(32,16),
             
             nn.Flatten()
         ), 
         decoder=nn.Sequential(
             
+            Reshape(-1, 32,32,32),
+            #Reshape(-1, 16,16,16),
 
-            Reshape(-1, 16,16,16),
-
-            ConvBlock(16,32),
-            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+            # ConvBlock(16,32),
+            # nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
 
             ConvBlock(32,64),
             nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
@@ -122,8 +122,8 @@ def COCO_VAE_factory(device="cpu"):
             nn.Sigmoid()
 
         ), 
-        latent_dim_num=8*8*8,
-        before_latent_dim=16*16*16
+        latent_dim_num=16*16*16,#8*8*8,
+        before_latent_dim=32*32*32
     )
 
 
