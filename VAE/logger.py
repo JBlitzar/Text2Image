@@ -15,8 +15,10 @@ def log_img(img, name):
 
 
 def init_logger(net, imgs, dir="runs"):
+    net.eval()
     global writer
     if not writer:
         writer = SummaryWriter(dir)
     writer.add_graph(net, imgs)
     writer.close()
+    net.train()

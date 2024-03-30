@@ -25,7 +25,7 @@ optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
 first_data = next(iter(dataloader))[0].to(device).unsqueeze(0)
 print(first_data.size())
-init_logger(net, first_data, dir="runs/cocovae256")
+init_logger(net, first_data, dir="runs/cocovae128")
 
 
 for epoch in trange(EPOCHS):
@@ -66,5 +66,6 @@ for epoch in trange(EPOCHS):
     
     if epoch % 1 == 0 :
         log_img(torchvision.utils.make_grid([last_batch, last_generated]),f"train_img/epoch_{epoch}.png")
+    if epoch % 10 == 0:
         with open(f"ckpt/epoch_{epoch}.pt", "wb+") as f:
             torch.save(net.state_dict(),f)

@@ -81,12 +81,12 @@ def COCO_VAE_factory(device="cpu"):
     return VAE(
         device=device, 
         encoder=nn.Sequential(
-            ConvBlock(3,256),
+            ConvBlock(3,128),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
-            ConvBlock(256,128),
+            # ConvBlock(256,128),
 
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            # nn.MaxPool2d(kernel_size=2, stride=2),
 
             ConvBlock(128,64),
 
@@ -114,11 +114,11 @@ def COCO_VAE_factory(device="cpu"):
             ConvBlock(64,128),
             nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
 
-            ConvBlock(128,256),
+            # ConvBlock(128,256),
             
-            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+            # nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
             
-            nn.Conv2d(256, 3, kernel_size=3, stride=1, padding=1 ),
+            nn.Conv2d(128, 3, kernel_size=3, stride=1, padding=1 ),
             nn.Sigmoid()
 
         ), 
