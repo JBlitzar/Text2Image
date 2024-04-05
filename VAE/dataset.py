@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 import glob
 from PIL import Image
+from bert_vectorize import vectorize_text_with_bert
 
 print("VAE dataset loaded.")
 
@@ -44,6 +45,28 @@ class VAECocoCaptionsDataset(Dataset):
 
         return image
 
+class VAECocoCaptionsDataset_Captions(Dataset):
+    def __init__(self, root, annFile, transform=None):
+        self.root = root
+        self.annFile = annFile
+        self.transform = transform
+        self._dataset = dset.CocoCaptions(root = root,
+                            annFile = annFile,
+                            transform=transform)
+
+    def __len__(self):
+        return self._dataset.__len__()
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        image, captions = self._dataset[idx]
+        captions = vectorize_text_with_bert(captions)[:5]
+        if self.transform and torch.max(image) > 1:
+            image = self.transform(image)
+
+        return image, captions
 
 def get_train_dataset():
     dataset = VAECocoCaptionsDataset(root = '../data/train2017',

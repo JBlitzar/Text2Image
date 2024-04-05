@@ -19,6 +19,46 @@ class ConvBlock(nn.Module):
 
         return self.block(x)
 
+class ShapePrinter(nn.Module):
+    def __init__(self, prefix=""):
+        super().__init__()
+        self.prefix = prefix
+    
+    def forward(self,x):
+        print(self.prefix + str(x.size()))
+        return x
+
+class DenseBlock(nn.Module):
+    def __init__(self, start, end, residual=False):
+        super().__init__()
+        self.start = start
+        self.end = end
+        self.block = nn.Sequential(
+            nn.Linear(start, end),
+            nn.ReLU(),
+            nn.Linear(end, end),
+            nn.ReLU()
+        )
+        self.residual = residual
+    def forward(self, x):
+        if self.residual:
+            return F.relu(x + self.block(x))
+        else:
+            return self.block(x)
+
+
+
+class DenseChain(nn.Module):
+    def __init__(self, size, length, residual=False):
+        super().__init__()
+        modules = []
+        for _ in range(length):
+            modules.append(DenseBlock(size, size, residual))
+        self.block = nn.Sequential(*modules)
+        
+    def forward(self, x):
+        return self.block(x)
+
 
 class Reshape(nn.Module):
     def __init__(self, *args):
@@ -126,6 +166,48 @@ def COCO_VAE_factory(device="cpu"):
         before_latent_dim=32*32*32
     )
 
+def COCO_T2I_VAE_factory(device="cpu"):
+    return VAE(
+        device=device, 
+        encoder=nn.Sequential(
+            nn.Flatten(),
+            DenseBlock(3840, 7680, False),
+            DenseBlock(7680, 15360, False),
+            DenseBlock(15360, 30720, False),
+            DenseBlock(30720, 32768, False),
+        ), 
+        decoder=nn.Sequential(
+            #ShapePrinter("decoder "),
+            
+            Reshape(-1, 32,32,32),
+            #ShapePrinter("reshaped "),
+            #Reshape(-1, 16,16,16),
+
+            # ConvBlock(16,32),
+            # nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+
+            ConvBlock(32,64),
+            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+
+            #ShapePrinter("halfway-decoded "),
+
+            ConvBlock(64,128),
+            nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+
+            # ConvBlock(128,256),
+            
+            # nn.Upsample(scale_factor=2, mode='nearest'),  # Bilinear or nearest
+            
+            nn.Conv2d(128, 3, kernel_size=3, stride=1, padding=1 ),
+            nn.Sigmoid(),
+            #ShapePrinter("output ")
+
+        ), 
+        latent_dim_num=16*16*16,#8*8*8,
+        before_latent_dim=32*32*32
+    )
+
+
 
 def vae_loss_function(inputs, results, mean, log_var):
     batch_size = inputs.size(0)
@@ -145,10 +227,17 @@ def vae_loss_function(inputs, results, mean, log_var):
 
 if __name__ == "__main__":
     with torch.no_grad():
-        net = COCO_VAE_factory(device="mps")
+        # net = COCO_VAE_factory(device="mps")
+        # net.eval()
+        # net.to("mps")
+        # out, _, _= net(torch.randn(64,3,256,256).to("mps"))
+        # print(out.size())
+        # assert tuple(out.size()) == (64,3,256,256)
+        # print("Done!")
+        net = COCO_T2I_VAE_factory(device="mps")
         net.eval()
         net.to("mps")
-        out, _, _= net(torch.randn(64,3,256,256).to("mps"))
+        out, _, _= net(torch.randn(64,768).to("mps"))
         print(out.size())
-        assert tuple(out.size()) == (64,3,256,256)
+        assert tuple(out.size()) == (64,3,128,128)
         print("Done!")

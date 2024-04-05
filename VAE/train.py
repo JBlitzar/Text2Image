@@ -1,5 +1,5 @@
-from vae_architecture import COCO_VAE_factory,vae_loss_function
-from dataset import get_train_dataset, get_dataloader, get_val_dataset
+from vae_architecture import COCO_VAE_factory,vae_loss_function, COCO_T2I_VAE_factory
+from dataset import get_train_dataset, get_dataloader, get_val_dataset, VAECocoCaptionsDataset_Captions, transforms
 import torch
 from tqdm import tqdm, trange
 from logger import log_data, init_logger, log_img
@@ -11,10 +11,13 @@ os.system(f"caffeinate -is -w {os.getpid()} &")
 
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
-dataloader = get_dataloader(get_val_dataset(), batch_size=32)#get_dataloader(get_train_dataset())
+dataset = VAECocoCaptionsDataset_Captions(root = '../data/train2017',
+                            annFile = '../data/annotations/captions_train2017.json',
+                            transform=transforms)
+dataloader = get_dataloader(dataset, batch_size=32)
 
 
-net = COCO_VAE_factory(device=device)
+net = COCO_T2I_VAE_factory(device=device)
 net.to(device)
 net.train()
 EPOCHS = 500
@@ -22,10 +25,11 @@ learning_rate = 0.001
 criterion = vae_loss_function#torch.nn.MSELoss()#torch.nn.BCELoss()#
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
-
-first_data = next(iter(dataloader))[0].to(device).unsqueeze(0)
+_, labels = next(iter(dataloader))
+del _
+first_data = labels[0].to(device).unsqueeze(0)
 print(first_data.size())
-init_logger(net, first_data, dir="runs/cocovae128")
+init_logger(net, first_data, dir="runs/t2i_cocovae128")
 
 
 for epoch in trange(EPOCHS):
@@ -38,12 +42,12 @@ for epoch in trange(EPOCHS):
     running_total_reconstruction = 0
     running_total_kl = 0
 
-    for batch in tqdm(dataloader):
+    for batch, labels in tqdm(dataloader):
         optimizer.zero_grad()
 
         batch = batch.to(device)
-
-        results, mean, logvar = net(batch)
+        labels = labels.to(device)
+        results, mean, logvar = net(labels)
 
         loss, reconstruction, kl = criterion(batch, results, mean, logvar)
 
