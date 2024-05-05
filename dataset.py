@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 import glob
 from PIL import Image
 from bert_vectorize import vectorize_text_with_bert
+import os
 
 transforms = v2.Compose([
     v2.PILToTensor(),
@@ -43,20 +44,20 @@ class VectorizedCocoCaptionsDataset(Dataset):
 
 
 def get_train_dataset():
-    dataset = VectorizedCocoCaptionsDataset(root = 'data/train2017',
-                            annFile = 'data/annotations/captions_train2017.json',
+    dataset = VectorizedCocoCaptionsDataset(root = os.path.expanduser("~/torch_datasets/coco/")+'data/train2017',
+                            annFile = os.path.expanduser("~/torch_datasets/coco/")+'data/annotations/captions_train2017.json',
                             transform=transforms)
     return dataset
 
 def get_test_dataset():
-    dataset = VectorizedCocoCaptionsDataset(root = 'data/test2017',
-                            annFile = 'data/annotations/captions_test2017.json',
+    dataset = VectorizedCocoCaptionsDataset(root = os.path.expanduser("~/torch_datasets/coco/")+'data/test2017',
+                            annFile = os.path.expanduser("~/torch_datasets/coco/")+'data/annotations/captions_test2017.json',
                             transform=transforms)
     return dataset
 
 def get_val_dataset():
-    dataset = VectorizedCocoCaptionsDataset(root = 'data/val2017',
-                            annFile = 'data/annotations/captions_val2017.json',
+    dataset = VectorizedCocoCaptionsDataset(root = os.path.expanduser("~/torch_datasets/coco/")+'data/val2017',
+                            annFile = os.path.expanduser("~/torch_datasets/coco/")+'data/annotations/captions_val2017.json',
                             transform=transforms)
     return dataset
 
