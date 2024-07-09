@@ -1,4 +1,15 @@
 # Text2Image
+
+
+https://arxiv.org/pdf/2102.12092
+https://github.com/openai/guided-diffusion?tab=readme-ov-file 
+
+
+
+
+
+
+
 https://scholar.harvard.edu/files/binxuw/files/stable_diffusion_a_tutorial.pdf
 - Dataset:
 
