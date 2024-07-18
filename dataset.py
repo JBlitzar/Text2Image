@@ -22,8 +22,14 @@ transforms = v2.Compose([
 
 
 
-def CocoCaptionsDatasetWrapper(Dataset):
+class CocoCaptionsDatasetWrapper(Dataset):
     def __init__(self, root, transform=None, split="train"):
+
+
+
+        super(CocoCaptionsDatasetWrapper, self).__init__()
+
+
         self.internal_dataset = dset.CocoCaptions(os.path.join(root, f"{split}2017"), os.path.join(root, "annotations", f"captions_{split}2017.json"), transform=transform)
 
     def __len__(self):
@@ -32,7 +38,7 @@ def CocoCaptionsDatasetWrapper(Dataset):
     def __getitem__(self, idx):
         img, captions = self.internal_dataset.__getitem__(idx)
 
-        caption = captions[torch.randint(0, len(captions))]
+        caption = captions[torch.randint(len(captions), (1,)).item()]
 
         caption = vectorize_text_with_bert(caption)
 
@@ -44,7 +50,7 @@ def CocoCaptionsDatasetWrapper(Dataset):
 
 def get_train_dataset():
     dataset = CocoCaptionsDatasetWrapper(
-        root_dir=os.path.expanduser("~/torch_datasets/coco"),
+        root=os.path.expanduser("~/torch_datasets/coco"),
         split="train",
         transform=transforms
     )
@@ -52,7 +58,7 @@ def get_train_dataset():
 
 def get_test_dataset():
     dataset = CocoCaptionsDatasetWrapper(
-        root_dir=os.path.expanduser("~/torch_datasets/coco"),
+        root=os.path.expanduser("~/torch_datasets/coco"),
         split="test",
         transform=transforms
     )

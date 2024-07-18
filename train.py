@@ -1,6 +1,6 @@
 from factories import UNet_conditional
 
-from dataset import get_dataset, get_dataloader
+from dataset import get_train_dataset, get_dataloader
 import torch
 from tqdm import tqdm, trange
 from logger import log_data, init_logger, log_img
@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/cond_run_1"
+EXPERIMENT_DIRECTORY = "runs/test_run_1"
 
 
 
@@ -38,7 +38,7 @@ if not IS_TEMP and RESUME == 0:
 
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
-dataloader = get_dataloader(get_dataset(), batch_size=16)
+dataloader = get_dataloader(get_train_dataset(), batch_size=16)
 
 
 
@@ -76,11 +76,11 @@ for epoch in trange(EPOCHS):
 
 
 
-    for batch in (pbar := tqdm(dataloader)):
+    for batch, label in (pbar := tqdm(dataloader)):
 
         optimizer.zero_grad()
 
-        loss = wrapper.training_loop_iteration(optimizer, batch, criterion)
+        loss = wrapper.training_loop_iteration(optimizer, batch, label, criterion)
 
         running_total += loss
         
