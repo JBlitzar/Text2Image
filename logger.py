@@ -28,6 +28,7 @@ def save_grid_with_label(img_grid, label, out_file):
 
 
     plt.close(fig)
+    plt.close("all")
 
 
 
