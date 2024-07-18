@@ -92,11 +92,12 @@ for epoch in trange(EPOCHS):
 
 
         pbar.set_description(f"Loss: {'%.2f' % loss}")
-        if step % 500 == 0:
+        if step % 500 == 499:
+            last_generated = wrapper.sample(64).detach().cpu()
             log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}_step_{step}.png")
 
 
-    last_generated = wrapper.sample(64).detach().cpu()
+    
     
     
     
@@ -112,6 +113,7 @@ for epoch in trange(EPOCHS):
             torch.save(net.state_dict(),f)
     
     if epoch % 1 == 0:
+        last_generated = wrapper.sample(64).detach().cpu()
         log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}.png")
     if epoch % 10 == 0 :
         with open(f"{EXPERIMENT_DIRECTORY}/ckpt/epoch_{epoch}.pt", "wb+") as f:
