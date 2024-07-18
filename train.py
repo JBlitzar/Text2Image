@@ -116,7 +116,7 @@ for epoch in trange(EPOCHS):
 
 
         pbar.set_description(f"Loss: {'%.2f' % loss}")
-        if step % 5 == 4:
+        if step % 500 == 499:
             generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
            
             log_data({
