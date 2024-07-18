@@ -1,4 +1,4 @@
-from factories import Flowers32_unet
+from factories import UNet_conditional
 
 from dataset import get_dataset, get_dataloader
 import torch
@@ -11,7 +11,7 @@ import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-RESUME = 100
+RESUME = 0
 
 
 IS_TEMP = False
@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/dome_run_2"
+EXPERIMENT_DIRECTORY = "runs/cond_run_1"
 
 
 
@@ -42,7 +42,7 @@ dataloader = get_dataloader(get_dataset(), batch_size=16)
 
 
 
-net = Dome_UNet()
+net = UNet_conditional(num_classes=256)
 
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))

@@ -213,6 +213,7 @@ class UNet_conditional(nn.Module):
 
         if num_classes is not None:
             self.label_emb = nn.Embedding(num_classes, time_dim)
+            self.num_classes = num_classes
 
     def pos_encoding(self, t, channels):
         inv_freq = 1.0 / (
@@ -229,6 +230,7 @@ class UNet_conditional(nn.Module):
         t = self.pos_encoding(t, self.time_dim)
 
         if y is not None:
+            y = y[:self.num_classes]
             t += self.label_emb(y)
 
         x1 = self.inc(x)

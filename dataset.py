@@ -41,7 +41,7 @@ def CocoCaptionsDatasetWrapper(Dataset):
         
 
 
-#TODO: fix up dataloader
+
 def get_train_dataset():
     dataset = CocoCaptionsDatasetWrapper(
         root_dir=os.path.expanduser("~/torch_datasets/coco"),
