@@ -1,7 +1,7 @@
 .DS_Store
 data/*
 *.pt.trace.json
-
+.vscode/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
