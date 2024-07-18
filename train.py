@@ -68,13 +68,25 @@ init_logger(dir=EXPERIMENT_DIRECTORY+"/tensorboard")
 
 
 def generate_sample_save_images(path):
+   
+
     path = os.path.join(EXPERIMENT_DIRECTORY, "train_img", path)
     _, rand_label, rand_label_string = get_random_test_data()
     del _
 
 
     generated = wrapper.sample(64, rand_label).detach().cpu()
-    save_grid_with_label(torchvision.utils.make_grid(generated),rand_label_string, path)
+
+    row_size = tuple(generated.shape)[0]
+
+    generated_remapped = (generated - generated.min()) / (generated.max() - generated.min())
+
+    generated = torch.concat((generated, generated_remapped))
+    save_grid_with_label(torchvision.utils.make_grid(generated, nrow=row_size),rand_label_string, path)
+    
+
+
+    
 
 for epoch in trange(EPOCHS):
 
@@ -104,7 +116,7 @@ for epoch in trange(EPOCHS):
 
 
         pbar.set_description(f"Loss: {'%.2f' % loss}")
-        if step % 500 == 499:
+        if step % 5 == 4:
             generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
            
             log_data({
