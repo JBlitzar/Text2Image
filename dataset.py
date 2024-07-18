@@ -1,5 +1,5 @@
 import torchvision.datasets as dset
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, RandomSampler
 from torchvision.transforms import v2
 import torch
 from torch.utils.data import DataLoader
@@ -7,6 +7,7 @@ import glob
 from PIL import Image
 import os
 from bert_vectorize import vectorize_text_with_bert
+
 
 
 img_size = 64
@@ -40,10 +41,12 @@ class CocoCaptionsDatasetWrapper(Dataset):
 
         caption = captions[torch.randint(len(captions), (1,)).item()]
 
+        humanreadable_caption = caption
+
         caption = vectorize_text_with_bert(caption)
 
 
-        return img, caption
+        return img, caption, humanreadable_caption
         
 
 
@@ -59,10 +62,19 @@ def get_train_dataset():
 def get_test_dataset():
     dataset = CocoCaptionsDatasetWrapper(
         root=os.path.expanduser("~/torch_datasets/coco"),
-        split="test",
+        split="val",
         transform=transforms
     )
     return dataset
+
+def get_random_test_data():
+    testset = get_test_dataset()
+
+    sampler = RandomSampler(testset)
+
+    randomloader = DataLoader(testset, sampler=sampler, batch_size=1)
+
+    return next(iter(randomloader))
 
 
 

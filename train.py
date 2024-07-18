@@ -1,9 +1,9 @@
 from factories import UNet_conditional
-
-from dataset import get_train_dataset, get_dataloader
+import re
+from dataset import get_train_dataset, get_dataloader, get_random_test_data
 import torch
 from tqdm import tqdm, trange
-from logger import log_data, init_logger, log_img
+from logger import log_data, init_logger, log_img, save_grid_with_label
 import torchvision
 from wrapper import DiffusionManager, Schedule
 
@@ -34,6 +34,8 @@ if not IS_TEMP and RESUME == 0:
 
     os.mkdir(EXPERIMENT_DIRECTORY+"/ckpt")
 
+    os.mkdir(EXPERIMENT_DIRECTORY+"/train_img")
+
 
 
 device = "mps" if torch.backends.mps.is_available() else "cpu"
@@ -63,20 +65,30 @@ optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
 
 init_logger(dir=EXPERIMENT_DIRECTORY+"/tensorboard")
-#init_logger(net, next(iter(dataloader))[0].to(device), dir=EXPERIMENT_DIRECTORY+"/tensorboard")
+
+
+def generate_sample_save_images(path):
+    path = os.path.join(EXPERIMENT_DIRECTORY, "train_img", path)
+    _, rand_label, rand_label_string = get_random_test_data()
+    del _
+
+
+    generated = wrapper.sample(64, rand_label).detach().cpu()
+    save_grid_with_label(torchvision.utils.make_grid(generated),rand_label_string, path)
+
 for epoch in trange(EPOCHS):
 
     if epoch < RESUME:
         continue
     last_batch = None
-    last_generated = None
+
     running_total = 0
     num_runs = 0
 
 
 
 
-    for step, (batch, label) in enumerate(pbar := tqdm(dataloader)):
+    for step, (batch, label, _) in enumerate(pbar := tqdm(dataloader)):
 
         optimizer.zero_grad()
 
@@ -93,9 +105,8 @@ for epoch in trange(EPOCHS):
 
         pbar.set_description(f"Loss: {'%.2f' % loss}")
         if step % 500 == 499:
-            last_generated = wrapper.sample(64).detach().cpu()
-            log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}_step_{step}.png")
-
+            generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
+           
             log_data({
                 "Loss/Step/Train":loss
             },epoch * len(dataloader) + step)
@@ -117,8 +128,8 @@ for epoch in trange(EPOCHS):
             torch.save(net.state_dict(),f)
     
     if epoch % 1 == 0:
-        last_generated = wrapper.sample(64).detach().cpu()
-        log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}.png")
+       generate_sample_save_images(f"train_img/epoch_{epoch}.png")
+
     if epoch % 10 == 0 :
         with open(f"{EXPERIMENT_DIRECTORY}/ckpt/epoch_{epoch}.pt", "wb+") as f:
             torch.save(net.state_dict(),f)

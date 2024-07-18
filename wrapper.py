@@ -89,9 +89,11 @@ class DiffusionManager(nn.Module):
     
 
     
-    def sample(self, img_size, amt=5, use_tqdm=True):
+    def sample(self, img_size, condition, amt=5, use_tqdm=True):
 
         self.model.eval()
+
+        condition = condition.to(self.device)
 
         my_trange = lambda x, y, z: trange(x,y, z, leave=False)
         fn = my_trange if use_tqdm else range
@@ -104,7 +106,7 @@ class DiffusionManager(nn.Module):
 
                 timestep = timestep.to(self.device)
 
-                predicted_noise = self.model(cur_img, timestep)
+                predicted_noise = self.model(cur_img, timestep, condition)
 
                 beta, alpha, alpha_hat = self.get_schedule_at(i)
 
