@@ -1,7 +1,7 @@
-from transformers import BertTokenizer, BertModel
+from transformers import BertTokenizer, BertModel, DistilBertTokenizer, DistilBertModel
 import torch
-tokenizer = BertTokenizer.from_pretrained('distilbert-base-uncased')
-model = BertModel.from_pretrained('distilbert-base-uncased', output_hidden_states=True)
+tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+model = DistilBertModel.from_pretrained('distilbert-base-uncased', output_hidden_states=True)
 model.eval()
 def vectorize_text_with_bert(text):# from hf docs
     
