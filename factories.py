@@ -256,6 +256,10 @@ class UNet_conditional(nn.Module):
         x = self.sa5(x)
         x = self.up3(x, x1, t)
         x = self.sa6(x)
-        output = self.outc(x)
+        x = self.outc(x)
+
+
+
+        output = F.sigmoid(x)
         return output
 

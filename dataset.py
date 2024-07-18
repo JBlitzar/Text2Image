@@ -83,9 +83,14 @@ def get_dataloader(dataset, batch_size=64):
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":
-    cap = get_train_dataset()
-    print('Number of samples: ', len(cap))
-    img, target = cap[4] # load 4th sample
+    
+    print('Number of samples: ', len(get_train_dataset()))
+
+    cap = get_random_test_data()
+    img, label, humanlabel = cap
 
     print("Image Size: ", img.size())
-    print(target)
+    print(humanlabel)
+    print(torch.max(img))
+    print(torch.min(img))
+    print(torch.mean(img))
