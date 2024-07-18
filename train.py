@@ -1,98 +1,116 @@
-from run_net import run_ddpm, run_naive
+from factories import Flowers32_unet
+
+from dataset import get_dataset, get_dataloader
 import torch
-from dataset import get_train_dataset, get_dataloader
-from bert_vectorize import vectorize_text_with_bert
-from torch.optim import Adam
-from architecture import Unetv2, NaiveCNN
-import torch.nn as nn
-from run_net import run_ddpm
 from tqdm import tqdm, trange
-import numpy as np
-from PIL import Image
-from torch.utils.tensorboard import SummaryWriter
+from logger import log_data, init_logger, log_img
+import torchvision
+from wrapper import DiffusionManager, Schedule
+
 import os
-
-device = "cpu"
-if torch.backends.mps.is_available():
-    device = "mps"
-
-dataloader = get_dataloader(get_train_dataset(), batch_size=8) # memory, batch size 8 works
+os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-net = NaiveCNN(device=device)#Unetv2()
+RESUME = 100
+
+
+IS_TEMP = False
+if IS_TEMP:
+    print("Note: istemp set to true!")
+
+
+
+
+EXPERIMENT_DIRECTORY = "runs/dome_run_2"
+
+
+
+
+
+
+if not IS_TEMP and RESUME == 0:
+
+    os.mkdir(EXPERIMENT_DIRECTORY)
+
+    os.mkdir(EXPERIMENT_DIRECTORY+"/ckpt")
+
+
+
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+
+dataloader = get_dataloader(get_dataset(), batch_size=16)
+
+
+
+net = Dome_UNet()
+
+if RESUME > 0:
+    net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
+
+
 net.to(device)
-net.train()
 
-LEARNING_RATE = 0.001
+wrapper = DiffusionManager(net, device=device)
+wrapper.set_schedule(Schedule.LINEAR)
 
-optimizer = Adam(net.parameters(), lr=LEARNING_RATE)
-criterion = nn.MSELoss()
+EPOCHS = 500
+if IS_TEMP:
+    EPOCHS = 5
+learning_rate = 3e-4
 
-EPOCHS = 50
-PATH = "checkpoint.pt"
-net.load_state_dict(torch.load(f"ckpt/epoch_0_checkpoint.pt"))
-writer = None
-for i in trange(EPOCHS):
-    pbar = tqdm(dataloader)
-    current_loss = 0
-    most_recent_run_imgs = None
+criterion = torch.nn.MSELoss()
+optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
-    running_sum = 0
-    idx = 0
-    with torch.profiler.profile(
-            schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
-            on_trace_ready=torch.profiler.tensorboard_trace_handler('./runs'),
-            record_shapes=True,
-            profile_memory=True,
-            with_stack=True
-    ) as prof:
+
+init_logger(dir=EXPERIMENT_DIRECTORY+"/tensorboard")
+#init_logger(net, next(iter(dataloader))[0].to(device), dir=EXPERIMENT_DIRECTORY+"/tensorboard")
+for epoch in trange(EPOCHS):
+
+    if epoch < RESUME:
+        continue
+    last_batch = None
+    last_generated = None
+    running_total = 0
+    num_runs = 0
+
+
+
+
+    for batch in (pbar := tqdm(dataloader)):
+
+        optimizer.zero_grad()
+
+        loss = wrapper.training_loop_iteration(optimizer, batch, criterion)
+
+        running_total += loss
         
-        for image_batch, prompt_batch in pbar:
-            #prof.step()
-            optimizer.zero_grad()
-            desc = f"Loss: {round(current_loss,4)}"
-            
-            pbar.set_description(desc+" | prep")
-
-            prompt_batch = prompt_batch.to(device)
-            image_batch = image_batch.to(device)
-            pbar.set_description(desc+" | eval")
+        num_runs += 1
 
 
-            result, _image_batch = run_naive(net, prompt_batch, image_batch, device=device)#run_ddpm(net, prompt_batch, image_batch, device=device)
+        #optimizer.step()
+        last_batch = batch[0].detach().cpu()
 
 
+        pbar.set_description(f"Loss: {'%.2f' % loss}")
 
-            most_recent_run_imgs = result.to("cpu").detach().clone().numpy()* 255 
-            most_recent_run_imgs = most_recent_run_imgs.astype(np.uint8) 
-            pbar.set_description(desc+" | loss")
-            loss = criterion(result, _image_batch).to(device)
-            current_loss = loss.item()
-            running_sum += current_loss
-            pbar.set_description(desc+" | back")
-            loss.backward()
-            pbar.set_description(desc+" | step")
-            optimizer.step()
-            if idx % 10 == 0:
-                try:
-                    assert abs(torch.min(result)-torch.max(result)) > 0
-                except AssertionError:
-                    print("\nAssertion failed: assert abs(torch.min(result)-torch.max(result)) > 0\n")
-            # if idx % 300 == 0:
-            #     os.system("git commit -m 'autogit'")
-            #test
-            if idx % 50 == 0:
-                
-                print("\nSaving checkpoint\n")
 
-                Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_{idx}_generated.png")
-                torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
-            idx += 1
-    if not writer:
-        writer = SummaryWriter()
+    last_generated = wrapper.sample(64).detach().cpu()
+    
+    
+    
 
-    writer.add_scalar("Loss/train", running_sum/(len(dataloader)), i) 
+    tqdm.write(f"Loss: {running_total/num_runs}")
 
-    os.remove(f"train_imgs/{i}_generated.png")
-    Image.fromarray(np.transpose(most_recent_run_imgs[0],(1,2,0))).save(f"train_imgs/{i}_generated.png")
-    torch.save(net.state_dict(), f"ckpt/epoch_{i}_{PATH}")
+    log_data({
+        "Loss/Train":running_total/num_runs
+        },epoch)
+    
+    if not IS_TEMP:
+        with open(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt", "wb+") as f:
+            torch.save(net.state_dict(),f)
+    
+    if epoch % 1 == 0:
+        log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}.png")
+    # if epoch % 10 == 0 :
+    #     with open(f"{EXPERIMENT_DIRECTORY}/ckpt/epoch_{epoch}.pt", "wb+") as f:
+    #         torch.save(net.state_dict(),f)
