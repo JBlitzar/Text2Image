@@ -96,6 +96,10 @@ for epoch in trange(EPOCHS):
             last_generated = wrapper.sample(64).detach().cpu()
             log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}_step_{step}.png")
 
+            log_data({
+                "Loss/Step/Train":loss
+            },epoch * len(dataloader) + step)
+
 
     
     
