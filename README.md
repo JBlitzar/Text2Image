@@ -1,20 +1,24 @@
 # Text2Image
 
+Architecture
+
+- Get images, captions
+- Get random caption
+- run through conditioned ddpm unet
+- I'm going to need crossattention, probably
+- upsample later unet
+
+## Old readme
 
 https://arxiv.org/pdf/2102.12092
-https://github.com/openai/guided-diffusion?tab=readme-ov-file 
-
-
-
-
-
-
+https://github.com/openai/guided-diffusion?tab=readme-ov-file
 
 https://scholar.harvard.edu/files/binxuw/files/stable_diffusion_a_tutorial.pdf
+
 - Dataset:
 
   - Conceptual captions: https://ai.google.com/research/ConceptualCaptions/download (waaaay big, images not included (its links), and some broken links)
-  - Flickr30k: https://paperswithcode.com/dataset/flickr30k (might be too small, you need to fill out a form to get the data)
+  - ✅Flickr30k: https://paperswithcode.com/dataset/flickr30k (might be too small, you need to fill out a form to get the data)
   - ✅Coco captions: https://paperswithcode.com/dataset/coco-captions (just about right size, 25gb, direct dl), 640x480. https://cocodataset.org/#download
 
 - Preprocessing
