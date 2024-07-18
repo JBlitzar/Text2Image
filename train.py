@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/test_run_1"
+EXPERIMENT_DIRECTORY = "runs/run_1_coco64_domecond"
 
 
 
@@ -53,7 +53,7 @@ net.to(device)
 wrapper = DiffusionManager(net, device=device)
 wrapper.set_schedule(Schedule.LINEAR)
 
-EPOCHS = 500
+EPOCHS = 100
 if IS_TEMP:
     EPOCHS = 5
 learning_rate = 3e-4
@@ -76,7 +76,7 @@ for epoch in trange(EPOCHS):
 
 
 
-    for batch, label in (pbar := tqdm(dataloader)):
+    for step, (batch, label) in enumerate(pbar := tqdm(dataloader)):
 
         optimizer.zero_grad()
 
@@ -92,6 +92,8 @@ for epoch in trange(EPOCHS):
 
 
         pbar.set_description(f"Loss: {'%.2f' % loss}")
+        if step % 500 == 0:
+            log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}_step_{step}.png")
 
 
     last_generated = wrapper.sample(64).detach().cpu()
@@ -111,6 +113,6 @@ for epoch in trange(EPOCHS):
     
     if epoch % 1 == 0:
         log_img(torchvision.utils.make_grid(last_generated),f"train_img/epoch_{epoch}.png")
-    # if epoch % 10 == 0 :
-    #     with open(f"{EXPERIMENT_DIRECTORY}/ckpt/epoch_{epoch}.pt", "wb+") as f:
-    #         torch.save(net.state_dict(),f)
+    if epoch % 10 == 0 :
+        with open(f"{EXPERIMENT_DIRECTORY}/ckpt/epoch_{epoch}.pt", "wb+") as f:
+            torch.save(net.state_dict(),f)
