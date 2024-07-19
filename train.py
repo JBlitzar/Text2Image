@@ -88,7 +88,7 @@ def generate_sample_save_images(path):
 
     
 
-for epoch in trange(EPOCHS):
+for epoch in trange(EPOCHS, dynamic_ncols=True):
 
     if epoch < RESUME:
         continue
@@ -100,7 +100,7 @@ for epoch in trange(EPOCHS):
 
 
 
-    for step, (batch, label, _) in enumerate(pbar := tqdm(dataloader)):
+    for step, (batch, label, _) in enumerate(pbar := tqdm(dataloader, dynamic_ncols=True)):
 
         optimizer.zero_grad()
 

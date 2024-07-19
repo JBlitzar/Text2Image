@@ -8,7 +8,7 @@ from PIL import Image
 import os
 from bert_vectorize import vectorize_text_with_bert
 
-
+device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 img_size = 64
 transforms = v2.Compose([
@@ -42,7 +42,7 @@ class CocoCaptionsDatasetWrapper(Dataset):
         caption = captions[torch.randint(len(captions), (1,)).item()]
 
         humanreadable_caption = caption
-
+        caption = caption.to(device)
         caption = vectorize_text_with_bert(caption)
 
 

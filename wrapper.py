@@ -95,7 +95,7 @@ class DiffusionManager(nn.Module):
 
         condition = condition.to(self.device)
 
-        my_trange = lambda x, y, z: trange(x,y, z, leave=False)
+        my_trange = lambda x, y, z: trange(x,y, z, leave=False,dynamic_ncols=True)
         fn = my_trange if use_tqdm else range
         with torch.no_grad():
             

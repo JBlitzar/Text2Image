@@ -3,6 +3,10 @@ import torch
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 model = DistilBertModel.from_pretrained('distilbert-base-uncased', output_hidden_states=True)
 model.eval()
+
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+
+model = model.to(device)
 def vectorize_text_with_bert(text):# from hf docs
     
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
