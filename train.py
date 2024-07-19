@@ -11,7 +11,7 @@ import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-RESUME = 0
+RESUME = 8
 
 
 IS_TEMP = False

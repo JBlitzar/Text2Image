@@ -42,7 +42,7 @@ class CocoCaptionsDatasetWrapper(Dataset):
         caption = captions[torch.randint(len(captions), (1,)).item()]
 
         humanreadable_caption = caption
-        caption = caption.to(device)
+        
         caption = vectorize_text_with_bert(caption)
 
 

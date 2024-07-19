@@ -9,7 +9,7 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 model = model.to(device)
 def vectorize_text_with_bert(text):# from hf docs
     
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(device)
     with torch.no_grad():
         outputs = model(**inputs)
     hidden_states = outputs.hidden_states
