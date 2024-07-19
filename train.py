@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_1_coco64_domecond"
+EXPERIMENT_DIRECTORY = "runs/run_2_coco64_domecond"
 
 
 
@@ -140,7 +140,7 @@ for epoch in trange(EPOCHS):
             torch.save(net.state_dict(),f)
     
     if epoch % 1 == 0:
-       generate_sample_save_images(f"train_img/epoch_{epoch}.png")
+       generate_sample_save_images(f"epoch_{epoch}.png")
 
     if epoch % 10 == 0 :
         with open(f"{EXPERIMENT_DIRECTORY}/ckpt/epoch_{epoch}.pt", "wb+") as f:
