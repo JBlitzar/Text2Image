@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_2_coco64_domecond"
+EXPERIMENT_DIRECTORY = "runs/run_1_coco64_domecond"
 
 
 
