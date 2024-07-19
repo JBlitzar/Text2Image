@@ -14,5 +14,5 @@ Thursday Jul 18 afternoon: 3h coding session
 
 Jul 19 morning:
 
-- Wow! Training is looking pretty good!
-- Main bottleneck is bert: taking a long time to evaluate: Model was on cpu. So I moved it to mps. Also added dynamic_ncols.
+- Wow! Training is looking pretty good! 45c89b3
+- Main bottleneck is distilbert vectorization: taking a long time to evaluate: Model was on cpu. So I moved it to mps. Also added dynamic_ncols to the progress bar. 38bb336
