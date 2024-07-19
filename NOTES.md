@@ -12,9 +12,11 @@ Thursday Jul 18 afternoon: 3h coding session
 
 - Trained for 500 steps and loss was looking good, image range was for some reason -34 to 27 or something?? Added sigmoid, and loss went way up. So I'm going to remove it. Checking input data it is securly between 0 and 1, so I dont know whats going on. This happened in the diffusion project, so I'm just going to trust the process. But I added a little thing where it shows a sampled image unremapped and remapped. I promise I wont interrupt training this time. 1e43aaa
 
-Jul 19 morning:
+Jul 19 training session:
 
 - Wow! Training is looking pretty good! 45c89b3
 - Main bottleneck is distilbert vectorization: taking a long time to evaluate: Model was on cpu. So I moved it to mps. Also added dynamic_ncols to the progress bar. 38bb336
 - Seems like I'm able to get away without crossattention because of the self attention + bert. Results are good, but not photorealistic so I'll see if that will be an issue. So far, loss hasn't plateaued, so we will continue training!
-- a
+- Btw after training for a bit remapped and clipped look basically the same
+- In terms of image quality, you definitely can tell some features, like a prompt with "house" looks like a house, but you defenitely couldn't tell what it was just given the image. some images are solid white
+- improvements: crossattention, cosine schedule, deeper conditional encoding rather than appending it to the timestep?
