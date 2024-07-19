@@ -123,6 +123,10 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
                 "Loss/Step/Train":loss
             },epoch * len(dataloader) + step)
 
+            if not IS_TEMP:
+                with open(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt", "wb+") as f:
+                    torch.save(net.state_dict(),f)
+
 
     
     
