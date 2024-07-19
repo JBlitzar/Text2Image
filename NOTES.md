@@ -16,3 +16,5 @@ Jul 19 morning:
 
 - Wow! Training is looking pretty good! 45c89b3
 - Main bottleneck is distilbert vectorization: taking a long time to evaluate: Model was on cpu. So I moved it to mps. Also added dynamic_ncols to the progress bar. 38bb336
+- Seems like I'm able to get away without crossattention because of the self attention + bert. Results are good, but not photorealistic so I'll see if that will be an issue. So far, loss hasn't plateaued, so we will continue training!
+- a
