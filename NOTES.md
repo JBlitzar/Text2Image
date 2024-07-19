@@ -19,4 +19,5 @@ Jul 19 training session:
 - Seems like I'm able to get away without crossattention because of the self attention + bert. Results are good, but not photorealistic so I'll see if that will be an issue. So far, loss hasn't plateaued, so we will continue training!
 - Btw after training for a bit remapped and clipped look basically the same
 - In terms of image quality, you definitely can tell some features, like a prompt with "house" looks like a house, but you defenitely couldn't tell what it was just given the image. some images are solid white
-- improvements: crossattention, cosine schedule, deeper conditional encoding rather than appending it to the timestep?
+- improvements: crossattention, cosine schedule (+ less timesteps), deeper conditional (prompt) encoding rather than appending it to the timestep?
+-
