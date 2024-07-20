@@ -28,3 +28,10 @@ Jul 19 coding session afternoon:
 - Seems right off the bat that the loss is a bit higher. So I increased learning rate by a factor of 3 since I increased the model complexity. (ig? It seemed to quell). Training is a bit slower, similar results of ~0.05 loss at step 400
 - I have confidence in the crossattention + selfattention pair, I think it will be great!
 - Things to tweak: lr, batch size, x/sa ordering, model architecture size, schedule start/end/timesteps/type, etc
+- I think I will train the original model overnight so that we can see if it gets better, otherwise start in on this new one. (which I will need to fix up cuz theres problems with shapes)
+
+Jul 20
+
+- yeah, so the original architecture plateaued at loss=0.01 and stayed there, results seem to look basically all the same.
+- Started up the attention version, fixed the problem when sampling by repeating the condition tensor (I cant believe we werent doing that before and it would work!)
+- Again, promising loss: 0.05 after 100 steps

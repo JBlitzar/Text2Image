@@ -91,6 +91,9 @@ class DiffusionManager(nn.Module):
     
     def sample(self, img_size, condition, amt=5, use_tqdm=True):
 
+        if tuple(condition.shape)[0] < amt:
+            condition = condition.repeat(amt, 1)
+
         self.model.eval()
 
         condition = condition.to(self.device)
@@ -105,6 +108,8 @@ class DiffusionManager(nn.Module):
                 timestep = torch.ones(amt) * (i)
 
                 timestep = timestep.to(self.device)
+
+
 
                 predicted_noise = self.model(cur_img, timestep, condition)
 
@@ -139,6 +144,7 @@ class DiffusionManager(nn.Module):
 
         if torch.isnan(noisy_batch).any() or torch.isnan(real_noise).any():
             print_("NaNs detected in the noisy batch or real noise")
+
 
         pred_noise = self.model(noisy_batch, timesteps, label)
 
