@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_1_tests_coco64_domecond"
+EXPERIMENT_DIRECTORY = "runs/run_1_coco64_domecond"
 
 
 
@@ -116,7 +116,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
 
         pbar.set_description(f"Loss: {'%.4f' % loss}")
-        if step % 5 == 4:
+        if step % 500 == 499:
             generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
            
             log_data({
