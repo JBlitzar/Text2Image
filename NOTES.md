@@ -21,3 +21,10 @@ Jul 19 training session:
 - In terms of image quality, you definitely can tell some features, like a prompt with "house" looks like a house, but you defenitely couldn't tell what it was just given the image. some images are solid white
 - improvements: crossattention, cosine schedule (+ less timesteps), deeper conditional (prompt) encoding rather than appending it to the timestep?
 -
+
+Jul 19 coding session afternoon:
+
+- Okay, I've paused the current training to implement some improvements. I added crossattention, which took quite a bit of debugging. I switched over to cosine schedule and 500 noising steps. I also increased batch size to 32 from 16. Lets hit the go button and see what happens!
+- Seems right off the bat that the loss is a bit higher. So I increased learning rate by a factor of 3 since I increased the model complexity. (ig? It seemed to quell). Training is a bit slower, similar results of ~0.05 loss at step 400
+- I have confidence in the crossattention + selfattention pair, I think it will be great!
+- Things to tweak: lr, batch size, x/sa ordering, model architecture size, schedule start/end/timesteps/type, etc

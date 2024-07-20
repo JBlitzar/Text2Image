@@ -11,7 +11,7 @@ import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-RESUME = 10
+RESUME = 0
 
 
 IS_TEMP = False
@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_1_coco64_domecond"
+EXPERIMENT_DIRECTORY = "runs/run_2_xa_cos"
 
 
 
@@ -44,7 +44,7 @@ dataloader = get_dataloader(get_train_dataset(), batch_size=16)
 
 
 
-net = UNet_conditional(num_classes=256)
+net = UNet_conditional(num_classes=768)
 
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
@@ -52,13 +52,13 @@ if RESUME > 0:
 
 net.to(device)
 
-wrapper = DiffusionManager(net, device=device)
-wrapper.set_schedule(Schedule.LINEAR)
+wrapper = DiffusionManager(net, device=device, noise_steps=500)
+wrapper.set_schedule(Schedule.COSINE)
 
 EPOCHS = 100
 if IS_TEMP:
     EPOCHS = 5
-learning_rate = 3e-4
+learning_rate = 1e-3
 
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
@@ -115,7 +115,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
         last_batch = batch[0].detach().cpu()
 
 
-        pbar.set_description(f"Loss: {'%.2f' % loss}")
+        pbar.set_description(f"Loss: {'%.4f' % loss}")
         if step % 500 == 499:
             generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
            
