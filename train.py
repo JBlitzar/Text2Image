@@ -58,7 +58,7 @@ wrapper.set_schedule(Schedule.COSINE)
 EPOCHS = 100
 if IS_TEMP:
     EPOCHS = 5
-learning_rate = 3e-4
+learning_rate = 1e-3
 
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
