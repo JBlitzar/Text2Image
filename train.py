@@ -11,7 +11,7 @@ import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-RESUME = 10
+RESUME = 12
 
 
 IS_TEMP = False
@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_1_coco64_domecond"
+EXPERIMENT_DIRECTORY = "runs/run_1_tests_coco64_domecond"
 
 
 
@@ -115,8 +115,8 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
         last_batch = batch[0].detach().cpu()
 
 
-        pbar.set_description(f"Loss: {'%.2f' % loss}")
-        if step % 500 == 499:
+        pbar.set_description(f"Loss: {'%.4f' % loss}")
+        if step % 5 == 4:
             generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
            
             log_data({
