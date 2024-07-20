@@ -53,7 +53,53 @@ class SelfAttention(nn.Module):
         attention_value = attention_value + x
         attention_value = self.ff_self(attention_value) + attention_value
         return attention_value.swapaxes(2, 1).view(-1, self.channels, self.size, self.size)
+    
 
+class CrossAttention(nn.Module):
+    def __init__(self, channels, size, context_dim):
+        super(CrossAttention, self).__init__()
+        self.channels = channels
+        self.size = size
+        self.context_dim = context_dim
+        self.mha = nn.MultiheadAttention(channels, 4, batch_first=True)
+        self.ln = nn.LayerNorm(channels)
+        self.context_ln = nn.LayerNorm(channels)
+        self.ff_self = nn.Sequential(
+            nn.LayerNorm(channels),
+            nn.Linear(channels, channels),
+            nn.GELU(),
+            nn.Linear(channels, channels),
+        )
+
+
+        self.context_proj = nn.Linear(context_dim, channels)
+
+    def forward(self, x, context):
+        
+        # Reshape and permute x for multi-head attention
+        batch_size, channels, height, width = x.size()
+        x = x.view(-1, self.channels, self.size * self.size).swapaxes(1,2)
+        x_ln = self.ln(x)
+
+        # Expand context to match the sequence length of x
+        context = self.context_proj(context)
+
+        context = context.unsqueeze(1).expand(-1, x_ln.size(1), -1)
+
+        context_ln = self.context_ln(context)
+
+        
+
+
+
+        # Apply cross-attention
+        attention_value, _ = self.mha(x_ln, context_ln, context_ln)
+        attention_value = attention_value + x
+        attention_value = self.ff_self(attention_value) + attention_value
+
+        # Reshape and permute back to the original format
+        return attention_value.permute(0, 2, 1).view(batch_size, channels, height, width)
+    
 
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels, mid_channels=None, residual=False):
@@ -187,16 +233,22 @@ class Dome_UNet(nn.Module):
 
 
 class UNet_conditional(nn.Module):
-    def __init__(self, c_in=3, c_out=3, time_dim=256, num_classes=None, device="mps"):
+    def __init__(self, c_in=3, c_out=3, time_dim=256, num_classes=None, context_dim=None, device="mps"):
         super().__init__()
+
+        if context_dim is None:
+            context_dim = num_classes
         self.device = device
         self.time_dim = time_dim
         self.inc = DoubleConv(c_in, 64)
         self.down1 = Down(64, 128)
         self.sa1 = SelfAttention(128, 32)
+        self.xa1 = CrossAttention(128, 32, context_dim)
         self.down2 = Down(128, 256)
+        self.xa2 = CrossAttention(256, 16, context_dim)
         self.sa2 = SelfAttention(256, 16)
         self.down3 = Down(256, 256)
+        self.xa3 = CrossAttention(256, 8, context_dim)
         self.sa3 = SelfAttention(256, 8)
 
         self.bot1 = DoubleConv(256, 512)
@@ -204,16 +256,25 @@ class UNet_conditional(nn.Module):
         self.bot3 = DoubleConv(512, 256)
 
         self.up1 = Up(512, 128)
+        self.xa4 = CrossAttention(128, 16, context_dim)
         self.sa4 = SelfAttention(128, 16)
         self.up2 = Up(256, 64)
+        self.xa5 = CrossAttention(64, 32, context_dim)
         self.sa5 = SelfAttention(64, 32)
         self.up3 = Up(128, 64)
+        self.xa6 = CrossAttention(64, 64, context_dim)
         self.sa6 = SelfAttention(64, 64)
         self.outc = nn.Conv2d(64, c_out, kernel_size=1)
 
         if num_classes is not None:
             self.label_emb = nn.Linear(num_classes, time_dim)#Embedding(num_classes, time_dim)
             self.num_classes = num_classes
+            if context_dim is None:
+                context_dim = num_classes
+
+            self.context_dim = context_dim
+
+            self.label_crossattn_emb = nn.Linear(num_classes, context_dim)
 
     def pos_encoding(self, t, channels):
         inv_freq = 1.0 / (
@@ -231,6 +292,9 @@ class UNet_conditional(nn.Module):
 
         if y is not None:
 
+            attn_y = y[:,:self.num_classes]
+            attn_y = self.label_crossattn_emb(attn_y)
+
             y = y[:,:self.num_classes]
 
             y = self.label_emb(y)
@@ -239,22 +303,35 @@ class UNet_conditional(nn.Module):
             t += y
 
         x1 = self.inc(x)
+
         x2 = self.down1(x1, t)
+        x2 = self.xa1(x2, attn_y)
         x2 = self.sa1(x2)
+
         x3 = self.down2(x2, t)
+        x3 = self.xa2(x3, attn_y)
         x3 = self.sa2(x3)
+
         x4 = self.down3(x3, t)
+        x4 = self.xa3(x4, attn_y)
         x4 = self.sa3(x4)
+
 
         x4 = self.bot1(x4)
         x4 = self.bot2(x4)
         x4 = self.bot3(x4)
 
+
         x = self.up1(x4, x3, t)
+        x = self.xa4(x,attn_y)
         x = self.sa4(x)
+
         x = self.up2(x, x2, t)
+        x = self.xa5(x, attn_y)
         x = self.sa5(x)
+
         x = self.up3(x, x1, t)
+        x = self.xa6(x, attn_y)
         x = self.sa6(x)
         output = self.outc(x)
 

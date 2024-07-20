@@ -21,3 +21,7 @@ Jul 19 training session:
 - In terms of image quality, you definitely can tell some features, like a prompt with "house" looks like a house, but you defenitely couldn't tell what it was just given the image. some images are solid white
 - improvements: crossattention, cosine schedule (+ less timesteps), deeper conditional (prompt) encoding rather than appending it to the timestep?
 -
+
+Jul 19 coding session afternoon:
+
+- Okay, I've paused the current training to implement some improvements. I swapped out selfattention for crossattention, which took quite a bit of debugging. I switched over to cosine schedule and 500 noising steps. I also increased batch size to 32 from 16. Lets hit the go button and see what happens!
