@@ -240,6 +240,8 @@ class UNet_conditional(nn.Module):
             context_dim = num_classes
         self.device = device
         self.time_dim = time_dim
+
+
         self.inc = DoubleConv(c_in, 64)
         self.down1 = Down(64, 128)
         self.sa1 = SelfAttention(128, 32)
@@ -295,12 +297,12 @@ class UNet_conditional(nn.Module):
             attn_y = y[:,:self.num_classes]
             attn_y = self.label_crossattn_emb(attn_y)
 
-            y = y[:,:self.num_classes]
+            # y = y[:,:self.num_classes]
 
-            y = self.label_emb(y)
+            # y = self.label_emb(y)
 
 
-            t += y
+            # t += y
 
         x1 = self.inc(x)
 
