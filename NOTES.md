@@ -35,3 +35,9 @@ Jul 20
 - yeah, so the original architecture plateaued at loss=0.01 and stayed there, results seem to look basically all the same.
 - Started up the attention version, fixed the problem when sampling by repeating the condition tensor (I cant believe we werent doing that before and it would work!)
 - Again, promising loss: 0.05 after 100 steps
+
+Jul 21:
+
+- Ok, so it (`run_2_xa_cos`) converged to 0.03 after 7 epochs, so its safe to say that model performance was worse. Might be owing to the 500 noise steps, since I realized openai did got away with 50 noise steps _at inference_.
+- I'm going to try with just adding the cross-attention. I also switched it up so that C is injected just @ the crossattention, not also added to `t`.
+- This is taking a while, I'm going to try a just selfattn run first.
