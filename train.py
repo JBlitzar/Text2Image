@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_2_xa_cos"
+EXPERIMENT_DIRECTORY = "runs/run_3_jxa"
 
 
 
@@ -51,13 +51,13 @@ if RESUME > 0:
 
 net.to(device)
 
-wrapper = DiffusionManager(net, device=device, noise_steps=500)
-wrapper.set_schedule(Schedule.COSINE)
+wrapper = DiffusionManager(net, device=device, noise_steps=1000)
+wrapper.set_schedule(Schedule.LINEAR)
 
-EPOCHS = 100
+EPOCHS = 15
 if IS_TEMP:
     EPOCHS = 5
-learning_rate = 1e-3
+learning_rate = 3e-4
 
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
