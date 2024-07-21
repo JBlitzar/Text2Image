@@ -40,4 +40,6 @@ Jul 21:
 
 - Ok, so it (`run_2_xa_cos`) converged to 0.03 after 7 epochs, so its safe to say that model performance was worse. Might be owing to the 500 noise steps, since I realized openai did got away with 50 noise steps _at inference_.
 - I'm going to try with just adding the cross-attention. I also switched it up so that C is injected just @ the crossattention, not also added to `t`.
-- This is taking a while, I'm going to try a just selfattn run first.
+- This is taking a while, I'm going to try a just xattn run first.
+- ok. Just xattn run (`run_3_jxa` `jxa` just cross attention) is looking pretty good! Loss is jumpy, but as low as 0.015 halfway through epoch 1. (Ranges 0.1-3)
+- `run_3_jxa` 1 epoch later, and its looking pretty good! It took at least until epoch 3 on `run1`

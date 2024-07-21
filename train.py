@@ -10,7 +10,7 @@ from wrapper import DiffusionManager, Schedule
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 0
+RESUME = 2
 
 
 IS_TEMP = False

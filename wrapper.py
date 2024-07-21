@@ -62,7 +62,7 @@ class DiffusionManager(nn.Module):
     
     @staticmethod
     def _unsqueezify(value):
-        return value.unsqueeze(-1).unsqueeze(-1).unsqueeze(-1)
+        return value.view(-1, 1, 1, 1)#.unsqueeze(-1).unsqueeze(-1).unsqueeze(-1)
         
     def noise_image(self, image, step):
 
