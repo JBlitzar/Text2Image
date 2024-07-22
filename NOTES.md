@@ -42,4 +42,5 @@ Jul 21:
 - I'm going to try with just adding the cross-attention. I also switched it up so that C is injected just @ the crossattention, not also added to `t`.
 - This is taking a while, I'm going to try a just xattn run first.
 - ok. Just xattn run (`run_3_jxa` `jxa` just cross attention) is looking pretty good! Loss is jumpy, but as low as 0.015 halfway through epoch 1. (Ranges 0.1-3)
-- `run_3_jxa` 1 epoch later, and its looking pretty good! It took at least until epoch 3 on `run1`
+- `run_3_jxa` 1 epoch later, and its looking pretty good! It took at least until epoch 3 on `run1` to get not-noise images, but by epoch 1 it happened for us
+- ok quite a few hours later, results are looking pretty good! (epoch 7) Like it actually looks like the thing its describing. (kind of)
