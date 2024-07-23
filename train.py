@@ -10,7 +10,7 @@ from wrapper import DiffusionManager, Schedule
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 2
+RESUME = 15
 
 
 IS_TEMP = False
@@ -54,7 +54,7 @@ net.to(device)
 wrapper = DiffusionManager(net, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
 
-EPOCHS = 15
+EPOCHS = 50
 if IS_TEMP:
     EPOCHS = 5
 learning_rate = 3e-4
