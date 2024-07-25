@@ -59,3 +59,4 @@ Jul 25:
 - ===
 - Okay after all that rambling, I've started training with FID and clip. Speeds are pretty much the same, however extra 14-20min per epoch for fid calculation (Kind of yikes: might bump the 500 interval to 1k or something: 14 generated images per epoch is a while, bc thats 14/hr or 1 every 4 mins). We'll see how this goes, and of course I'm going to have to go through about 3 days of training time. RAM use is up, 35gb rather than like 20 (7f1e092)
 - I bumped up the step checker to every 1k steps, approx every 12 minutes. The fid slowdown is now only 7 mins, and CLIP doesn't seem to incur any slowdown (but does incur higher memory usage rather than distilbert)
+- Looking good: 0.05 after 100 steps, 0.02 after 700
