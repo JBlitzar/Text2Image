@@ -47,4 +47,9 @@ Jul 21:
 
 Jul 22:
 
-- Okay, its the morning ( epoch 14 `run_3_jxa`) and things are looking good! Losses around 0.05, going as low as 0.02. wow! Things are coming along, I'll train this up and then set my sights on the unet.
+- Okay, its the morning ( epoch 14 `run_3_jxa`) and things are looking good! Losses around 0.05, going as low as 0.02. wow! Things are coming along, I'll train this up and then set my sights on the super resolution unet.
+
+Jul 25:
+
+- Okay, it seems to have plateaued, in terms of loss and image quality. Interestinly, `run3` has converged just about the same as `run1`, but perhaps that shows the shortcomings of MSE as a loss metric. Should I get a FID evaluator up and running? So I've added that now. For reference, SOTA models get an FID of around 2.5 or 3 last I checked (Nevermind more like 1.5)
+- Also, thoughts on super resolution, which I will want eventually. https://arxiv.org/pdf/2405.14822v1 says that you literally hot-wire the diffusion model to have a bigger decoder, but freeze the original components, so its not a diffusion model then running through unet, its a diffusion unet with a bigger decoder.

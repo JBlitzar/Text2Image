@@ -6,11 +6,11 @@ from tqdm import tqdm, trange
 from logger import log_data, init_logger, log_img, save_grid_with_label
 import torchvision
 from wrapper import DiffusionManager, Schedule
-
+from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 15
+RESUME = 0
 
 
 IS_TEMP = False
@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_3_jxa"
+EXPERIMENT_DIRECTORY = "runs/run_4_jxa_fid"
 
 
 
@@ -41,6 +41,8 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 dataloader = get_dataloader(get_train_dataset(), batch_size=16)
 
+metric = FrechetInceptionDistance(device=device)
+epoch_step_metric = FrechetInceptionDistance(device=device)
 
 
 net = UNet_conditional(num_classes=768)
@@ -82,6 +84,8 @@ def generate_sample_save_images(path):
 
     generated = torch.concat((generated, generated_remapped))
     save_grid_with_label(torchvision.utils.make_grid(generated, nrow=row_size),rand_label_string, path)
+
+    return generated
     
 
 
@@ -98,8 +102,9 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
 
 
-
+    metric.reset()
     for step, (batch, label, _) in enumerate(pbar := tqdm(dataloader, dynamic_ncols=True)):
+        epoch_step_metric.reset()
 
         optimizer.zero_grad()
 
@@ -116,10 +121,19 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
         pbar.set_description(f"Loss: {'%.4f' % loss}")
         if step % 500 == 499:
-            generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
-           
+            generated = generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
+            metric.update(generated.clip(0,1), False)
+            metric.update(batch[:generated.size(0)], True)
+            epoch_step_metric.update(generated.clip(0,1), False)
+            epoch_step_metric.update(batch[:generated.size(0)], True)
+
+
             log_data({
                 "Loss/Step/Train":loss
+            },epoch * len(dataloader) + step)
+
+            log_data({
+                "FID/Step/Train":epoch_step_metric.compute().item()
             },epoch * len(dataloader) + step)
 
             if not IS_TEMP:
@@ -137,6 +151,9 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
     log_data({
         "Loss/Train":running_total/num_runs
         },epoch)
+    log_data({
+                "FID/Train":metric.compute().item()
+    },epoch)
     
     if not IS_TEMP:
         with open(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt", "wb+") as f:
