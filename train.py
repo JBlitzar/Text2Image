@@ -41,8 +41,8 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 dataloader = get_dataloader(get_train_dataset(), batch_size=16)
 
-metric = FrechetInceptionDistance(device=device)
-epoch_step_metric = FrechetInceptionDistance(device=device)
+metric = FrechetInceptionDistance(device="cpu") # NotImplementedError: The operator 'aten::_linalg_eigvals' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.
+epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
 net = UNet_conditional(num_classes=768)
@@ -122,10 +122,10 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
         pbar.set_description(f"Loss: {'%.4f' % loss}")
         if step % 500 == 499:
             generated = generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
-            metric.update(generated.clip(0,1), False)
-            metric.update(batch[:generated.size(0)].clip(0,1), True)
-            epoch_step_metric.update(generated.clip(0,1), False)
-            epoch_step_metric.update(batch[:generated.size(0)].clip(0,1), True)
+            metric.update(generated.clip(0,1).to("cpu"), False)
+            metric.update(batch[:generated.size(0)].clip(0,1).to("cpu"), True)
+            epoch_step_metric.update(generated.clip(0,1).to("cpu"), False)
+            epoch_step_metric.update(batch[:generated.size(0)].clip(0,1).to("cpu"), True)
 
 
             log_data({
