@@ -123,9 +123,9 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
         if step % 500 == 499:
             generated = generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
             metric.update(generated.clip(0,1), False)
-            metric.update(batch[:generated.size(0)], True)
+            metric.update(batch[:generated.size(0)].clip(0,1), True)
             epoch_step_metric.update(generated.clip(0,1), False)
-            epoch_step_metric.update(batch[:generated.size(0)], True)
+            epoch_step_metric.update(batch[:generated.size(0)].clip(0,1), True)
 
 
             log_data({
