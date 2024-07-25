@@ -72,8 +72,8 @@ def generate_sample_save_images(path):
    
 
     path = os.path.join(EXPERIMENT_DIRECTORY, "train_img", path)
-    _, rand_label, rand_label_string = get_random_test_data()
-    del _
+    rand_data, rand_label, rand_label_string = get_random_test_data()
+
 
 
     generated = wrapper.sample(64, rand_label).detach().cpu()
@@ -85,8 +85,19 @@ def generate_sample_save_images(path):
     generated = torch.concat((generated, generated_remapped))
     save_grid_with_label(torchvision.utils.make_grid(generated, nrow=row_size),rand_label_string, path)
 
-    return generated
-    
+    return generated, rand_data
+
+def generate_imgs_for_fid():
+
+    rand_data, rand_label, rand_label_string = get_random_test_data(16)
+
+
+
+    generated = wrapper.sample_multicond(64, rand_label).detach().cpu()
+
+
+
+    return generated.clip(0,1).to("cpu"), rand_data.clip(0,1).to("cpu")
 
 
     
@@ -121,11 +132,14 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
         pbar.set_description(f"Loss: {'%.4f' % loss}")
         if step % 500 == 499:
-            generated = generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
+            generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
+            generated, data = generate_imgs_for_fid()
+            print(generated.shape)
+            print(data.shape)
             metric.update(generated.clip(0,1).to("cpu"), False)
-            metric.update(batch[:generated.size(0)].clip(0,1).to("cpu"), True)
+            metric.update(data.clip(0,1).to("cpu"), True)
             epoch_step_metric.update(generated.clip(0,1).to("cpu"), False)
-            epoch_step_metric.update(batch[:generated.size(0)].clip(0,1).to("cpu"), True)
+            epoch_step_metric.update(data.clip(0,1).to("cpu"), True)
 
 
             log_data({

@@ -67,12 +67,12 @@ def get_test_dataset():
     )
     return dataset
 
-def get_random_test_data():
+def get_random_test_data(amount=1):
     testset = get_test_dataset()
 
     sampler = RandomSampler(testset)
 
-    randomloader = DataLoader(testset, sampler=sampler, batch_size=1)
+    randomloader = DataLoader(testset, sampler=sampler, batch_size=amount)
 
     return next(iter(randomloader))
 

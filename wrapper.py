@@ -127,6 +127,41 @@ class DiffusionManager(nn.Module):
 
     
         return cur_img
+    def sample_multicond(self, img_size, condition, use_tqdm=True):
+        num_conditions = condition.shape[0]
+
+        
+        
+        amt = num_conditions
+
+        self.model.eval()
+
+        condition = condition.to(self.device)
+
+        my_trange = lambda x, y, z: trange(x, y, z, leave=False, dynamic_ncols=True)
+        fn = my_trange if use_tqdm else range
+        
+        with torch.no_grad():
+
+            cur_img = torch.randn((amt, 3, img_size, img_size)).to(self.device)
+            
+            for i in fn(self.noise_steps-1, 0, -1):
+                timestep = torch.ones(amt) * i
+                timestep = timestep.to(self.device)
+
+
+                predicted_noise = self.model(cur_img, timestep, condition)
+
+                beta, alpha, alpha_hat = self.get_schedule_at(i)
+
+                cur_img = (1 / torch.sqrt(alpha)) * (cur_img - (beta / torch.sqrt(1 - alpha_hat)) * predicted_noise)
+                if i > 1:
+                    cur_img = cur_img + torch.sqrt(beta) * torch.randn_like(cur_img)
+
+        self.model.train()
+
+        # Return images sampled for each condition
+        return cur_img
     
     def training_loop_iteration(self, optimizer, batch, label, criterion):
 
