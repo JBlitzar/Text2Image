@@ -56,3 +56,5 @@ Jul 25:
 
 - Returning from that tangent, I've gotten FID up and working after squashing a few bugs (clipping generated and batch to [0,1] and moving them to cpu). Keep in mind this is the same architecture as before. I could change to cosine, but it's more computationally expensive and doesn't actually add anything except faster inference.
 - One improvement: CLIP rather than distilbert because its meant for image-text pipelines
+- ===
+- Okay after all that rambling, I've started training with FID and clip. Speeds are pretty much the same, however extra 2min per epoch for fid calculation (negligible). We'll see how this goes, and of course I'm going to have to go through about 3 days of training time. RAM use is up, 35gb rather than like 20

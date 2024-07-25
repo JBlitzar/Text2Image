@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_4_jxa_fid"
+EXPERIMENT_DIRECTORY = "runs/run_4_xa_clip_fid"
 
 
 
@@ -45,7 +45,7 @@ metric = FrechetInceptionDistance(device="cpu") # NotImplementedError: The opera
 epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
-net = UNet_conditional(num_classes=768)
+net = UNet_conditional(num_classes=512)
 
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))

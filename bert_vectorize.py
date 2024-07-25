@@ -24,4 +24,4 @@ if __name__ == "__main__":
 
 
     print("Vectorized representation:", text_representation)
-    print(len(text_representation))
+    print(text_representation.shape)

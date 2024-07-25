@@ -15,7 +15,7 @@ def vectorize_text_with_clip(text):# from hf docs
         outputs = model(**inputs)
     
 
-    return outputs.text_embeds
+    return outputs.text_embeds.squeeze(0)
 
 
 

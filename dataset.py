@@ -6,8 +6,9 @@ from torch.utils.data import DataLoader
 import glob
 from PIL import Image
 import os
-from bert_vectorize import vectorize_text_with_bert
 
+#from bert_vectorize import vectorize_text_with_bert
+from clip_vectorize import vectorize_text_with_clip
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 img_size = 64
@@ -43,7 +44,7 @@ class CocoCaptionsDatasetWrapper(Dataset):
 
         humanreadable_caption = caption
         
-        caption = vectorize_text_with_bert(caption)
+        caption = vectorize_text_with_clip(caption)
 
 
         return img, caption, humanreadable_caption
