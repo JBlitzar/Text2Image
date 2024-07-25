@@ -8,7 +8,7 @@ model.eval()
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 model = model.to(device)
-def vectorize_text_with_bert(text):# from hf docs
+def vectorize_text_with_clip(text):# from hf docs
     
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(device)
     with torch.no_grad():
@@ -21,7 +21,7 @@ def vectorize_text_with_bert(text):# from hf docs
 
 if __name__ == "__main__":
     text = "A man walking down the street with a dog holding a balloon in one hand."
-    text_representation = vectorize_text_with_bert(text)
+    text_representation = vectorize_text_with_clip(text)
 
 
     print("Vectorized representation:", text_representation)

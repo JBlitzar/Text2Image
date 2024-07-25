@@ -55,4 +55,4 @@ Jul 25:
 - Also, thoughts on super resolution, which I will want eventually. https://arxiv.org/pdf/2405.14822v1 says that you literally hot-wire the diffusion model to have a bigger decoder, but freeze the original components, so its not a diffusion model then running through unet, its a diffusion unet with a bigger decoder. Its cost-effective and has faster training because you freeze most, add a bit, freeze most, add a bit, etc.
 
 - Returning from that tangent, I've gotten FID up and working after squashing a few bugs (clipping generated and batch to [0,1] and moving them to cpu). Keep in mind this is the same architecture as before. I could change to cosine, but it's more computationally expensive and doesn't actually add anything except faster inference.
-- One improvement: CLIP?
+- One improvement: CLIP rather than distilbert because its meant for image-text pipelines
