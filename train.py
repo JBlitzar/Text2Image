@@ -131,7 +131,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
 
         pbar.set_description(f"Loss: {'%.4f' % loss}")
-        if step % 500 == 499:
+        if step % 1000 == 999:
             generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
             generated, data = generate_imgs_for_fid()
             print(generated.shape)
