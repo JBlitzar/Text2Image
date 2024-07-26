@@ -51,12 +51,13 @@ Jul 22:
 
 Jul 25:
 
-- Okay, it seems to have plateaued, in terms of loss and image quality. Interestinly, `run3` has converged just about the same as `run1`, but perhaps that shows the shortcomings of MSE as a loss metric. Should I get a FID evaluator up and running? So I've added that now. For reference, SOTA models get an FID of 3 at the best on MSCOCO https://paperswithcode.com/sota/text-to-image-generation-on-coco
+- Okay, it seems to have plateaued, in terms of loss and image quality. Interestinly, `run3` has converged just about the same as `run1`, but perhaps that shows the shortcomings of MSE as a loss metric. Should I get a FID evaluator up and running? So I've added that now. For reference, SOTA models get an FID of 3 at the best on MSCOCO https://paperswithcode.com/sota/text-to-image-generation-on-coco, although I'll be happy if I get a value <100
 - Also, thoughts on super resolution, which I will want eventually. https://arxiv.org/pdf/2405.14822v1 says that you literally hot-wire the diffusion model to have a bigger decoder, but freeze the original components, so its not a diffusion model then running through unet, its a diffusion unet with a bigger decoder. Its cost-effective and has faster training because you freeze most, add a bit, freeze most, add a bit, etc.
 
 - Returning from that tangent, I've gotten FID up and working after squashing a few bugs (clipping generated and batch to [0,1] and moving them to cpu). Keep in mind this is the same architecture as before. I could change to cosine, but it's more computationally expensive and doesn't actually add anything except faster inference.
 - One improvement: CLIP rather than distilbert because its meant for image-text pipelines
 - ===
 - Okay after all that rambling, I've started training with FID and clip. Speeds are pretty much the same, however extra 14-20min per epoch for fid calculation (Kind of yikes: might bump the 500 interval to 1k or something: 14 generated images per epoch is a while, bc thats 14/hr or 1 every 4 mins). We'll see how this goes, and of course I'm going to have to go through about 3 days of training time. RAM use is up, 35gb rather than like 20 (7f1e092)
-- I bumped up the step checker to every 1k steps, approx every 12 minutes. The fid slowdown is now only 7 mins, and CLIP doesn't seem to incur any slowdown (but does incur higher memory usage rather than distilbert)
+- I bumped up the step checker to every 1k steps, approx every 12 minutes. The fid slowdown is now only 7 mins, and CLIP doesn't seem to incur any slowdown (1.5 it/s) (but does incur higher memory usage rather than distilbert)
 - Looking good: 0.05 after 100 steps, 0.02 after 700
+- Non-noise images appearing at epoch 2! Looking good.
