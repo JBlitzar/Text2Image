@@ -71,3 +71,7 @@ Jul 26:
 
 - FID is down to 166, very good!
 - By epoch 8 its starting to look like stuff.
+- Run4 seems to have the same loss curve as run3
+- (in terms of MSE)
+- FID 150 at epoch 10
+- Loss 0.003
