@@ -49,7 +49,7 @@ Jul 22:
 
 - Okay, its the morning ( epoch 14 `run_3_jxa`) and things are looking good! Losses around 0.05, going as low as 0.02. wow! Things are coming along, I'll train this up and then set my sights on the super resolution unet.
 
-Jul 25:
+Jul 25 ~3hr session:
 
 - Okay, it seems to have plateaued, in terms of loss and image quality. Interestinly, `run3` has converged just about the same as `run1`, but perhaps that shows the shortcomings of MSE as a loss metric. Should I get a FID evaluator up and running? So I've added that now. For reference, SOTA models get an FID of 3 at the best on MSCOCO https://paperswithcode.com/sota/text-to-image-generation-on-coco, although I'll be happy if I get a value <100
 - Also, thoughts on super resolution, which I will want eventually. https://arxiv.org/pdf/2405.14822v1 says that you literally hot-wire the diffusion model to have a bigger decoder, but freeze the original components, so its not a diffusion model then running through unet, its a diffusion unet with a bigger decoder. Its cost-effective and has faster training because you freeze most, add a bit, freeze most, add a bit, etc.
@@ -61,3 +61,13 @@ Jul 25:
 - I bumped up the step checker to every 1k steps, approx every 12 minutes. The fid slowdown is now only 7 mins, and CLIP doesn't seem to incur any slowdown (1.5 it/s) (but does incur higher memory usage rather than distilbert)
 - Looking good: 0.05 after 100 steps, 0.02 after 700
 - Non-noise images appearing at epoch 2! Looking good.
+- Loss 0.01 after 2 epochs. FID is still through the roof understandably
+- Epoch 2 step 6999 looks like something! fid is still high
+- Epoch 3 just started, FID just went below 300
+- Epoch 3 step 2999 Looking pretty good!
+- I'm going to run this overnight
+
+Jul 26:
+
+- FID is down to 166, very good!
+- By epoch 8 its starting to look like stuff.
