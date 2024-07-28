@@ -1,4 +1,4 @@
-from factories import UNet_conditional
+from og_architecture import Original_Unet_Conditional
 import re
 from dataset import get_train_dataset, get_dataloader, get_random_test_data
 import torch
@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_4_xa_clip_fid"
+EXPERIMENT_DIRECTORY = "runs/run_5_og_rerun"
 
 
 
@@ -45,7 +45,7 @@ metric = FrechetInceptionDistance(device="cpu") # NotImplementedError: The opera
 epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
-net = UNet_conditional(num_classes=512)
+net = Original_Unet_Conditional(num_classes=768)
 
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
