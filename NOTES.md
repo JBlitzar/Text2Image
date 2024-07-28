@@ -75,3 +75,11 @@ Jul 26:
 - (in terms of MSE)
 - FID 150 at epoch 10
 - Loss 0.003
+
+Jul 27:
+
+- Continued training, made a quick inference script and ran it on `jxa`. Performs relatively well (see `runs/jxa/generated`), performs better on captions in the testset, probably alluding to the captioning style, seems to perform better at certain things (like airplanes, bathrooms, and baseball). Possibly investigate a new dataset?
+
+Jul 28:
+
+- Okay, `xa_clip_fid` is doing ok, but I think its time to pause training. I think I should resume `run1`, so I'm going to go ahead and do that.

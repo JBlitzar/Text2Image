@@ -28,7 +28,7 @@ wrapper = DiffusionManager(net, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
 
 
-def generate_sample_save_images(prompt, amt=1):
+def infer(prompt, amt=1):
 
     path = os.path.join(EXPERIMENT_DIRECTORY, "inferred", re.sub(r'[^a-zA-Z\s]', '', prompt).replace(" ", "_")+str(int(time.time()))+".png")
 
@@ -39,5 +39,29 @@ def generate_sample_save_images(prompt, amt=1):
 
     save_grid_with_label(torchvision.utils.make_grid(generated),prompt, path)
 
+
+def run_jobs():
+    processed_tasks = set()
+    def read_jobs():
+        try:
+            with open("inference_jobs.txt", 'r') as file:
+                tasks = file.readlines()
+            return [task.strip() for task in tasks]
+        except FileNotFoundError:
+            return []
+    
+    tasks = read_jobs()
+    new_tasks = [task for task in tasks if task not in processed_tasks]
+    while new_tasks:
+        
+
+        if new_tasks:
+            for task in new_tasks:
+                infer(task, 8)
+                processed_tasks.add(task)
+        tasks = read_jobs()
+        new_tasks = [task for task in tasks if task not in processed_tasks]
+
 if __name__ == "__main__":
-    generate_sample_save_images(input("Prompt? "), 8)
+    #infer(input("Prompt? "), 8)
+    run_jobs()
