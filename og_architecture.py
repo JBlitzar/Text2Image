@@ -255,7 +255,7 @@ class Original_Unet_Conditional(nn.Module):
         x = self.sa5(x)
         x = self.up3(x, x1, t)
         x = self.sa6(x)
-        x = self.outc(x)
+
         output = self.outc(x)
 
         return output
