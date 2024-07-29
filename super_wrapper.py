@@ -125,21 +125,21 @@ class SuperResDiffusionManager(DiffusionManager):
         
         timesteps = self.random_timesteps(batch.shape[0]).to(self.device)
 
-        with torch.no_grad():
-            small_batch = self.pool(batch)
-            
-            
-            
-            noisy_batch, real_noise = self.pretrainedGen.noise_image(small_batch, timesteps)
 
-            if torch.isnan(noisy_batch).any() or torch.isnan(real_noise).any():
-                print_("NaNs detected in the noisy batch or real noise")
+        small_batch = self.pool(batch)
+        
+        
+        
+        noisy_batch, real_noise = self.pretrainedGen.noise_image(small_batch, timesteps)
+
+        if torch.isnan(noisy_batch).any() or torch.isnan(real_noise).any():
+            print_("NaNs detected in the noisy batch or real noise")
 
 
-            pred_noise = self.pretrainedGen.model(noisy_batch, timesteps, label)
+        pred_noise = self.pretrainedGen.model(noisy_batch, timesteps, label)
 
-            if torch.isnan(pred_noise).any():
-                print_("NaNs detected in the predicted noise")
+        if torch.isnan(pred_noise).any():
+            print_("NaNs detected in the predicted noise")
         
         
 
