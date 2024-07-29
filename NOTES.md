@@ -82,4 +82,4 @@ Jul 27:
 
 Jul 28:
 
-- Okay, `xa_clip_fid` is doing ok, but I think its time to pause training. I think I should resume `run1`, so I'm going to go ahead and do that.
+- Okay, `xa_clip_fid` is doing ok, but I think its time to pause training. So far, `jxa` is our best, so I'm going to try to code up super-resolution.

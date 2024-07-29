@@ -168,6 +168,9 @@ class DiffusionManager(nn.Module):
         def print_(string):
             for i in range(10):
                 print(string)
+
+        optimizer.zero_grad()
+
         batch = batch.to(self.device)
 
         #label = label.long() # uncomment for nn.Embedding

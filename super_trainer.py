@@ -1,5 +1,7 @@
 from factories import UNet_conditional
 import re
+from super_model import SuperRes_UNet_conditional
+from super_wrapper import SuperResDiffusionManager
 from dataset import get_train_dataset, get_dataloader, get_random_test_data
 import torch
 from tqdm import tqdm, trange
@@ -10,7 +12,11 @@ from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 20
+RESUME = 0
+
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+
+dataloader = get_dataloader(get_train_dataset(), batch_size=16)
 
 
 IS_TEMP = False
@@ -20,11 +26,17 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_4_xa_clip_fid"
+EXPERIMENT_DIRECTORY = "runs/run_3_jxa"
 
 
+frozen_net = UNet_conditional(num_classes=768)
+frozen_net.eval()
+frozen_net.load_state_dict(torch.load(EXPERIMENT_DIRECTORY+"/ckpt/latest.pt"))
+frozen_net.to(device)
+frozen_wrapper = DiffusionManager(frozen_net, device=device, noise_steps=1000)
+frozen_wrapper.set_schedule(Schedule.LINEAR)
 
-
+EXPERIMENT_DIRECTORY += "/super"
 
 
 if not IS_TEMP and RESUME == 0:
@@ -37,24 +49,24 @@ if not IS_TEMP and RESUME == 0:
 
 
 
-device = "mps" if torch.backends.mps.is_available() else "cpu"
 
-dataloader = get_dataloader(get_train_dataset(), batch_size=16)
 
 metric = FrechetInceptionDistance(device="cpu") # NotImplementedError: The operator 'aten::_linalg_eigvals' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.
 epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
-net = UNet_conditional(num_classes=768)
 
+net = SuperRes_UNet_conditional(num_classes=768,device=device)
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
 
 
 net.to(device)
 
-wrapper = DiffusionManager(net, device=device, noise_steps=1000)
+wrapper = SuperResDiffusionManager(net, pretrainedGenWrapper=frozen_wrapper, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
+
+
 
 EPOCHS = 50
 if IS_TEMP:
