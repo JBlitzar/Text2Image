@@ -27,9 +27,9 @@ dataloader = get_dataloader(get_train_dataset())
 testloader = get_dataloader(get_test_dataset())
 
 
-KL_WEIGHT = 1#0.002
+KL_WEIGHT = 0.002
 
-net, _ = COCO_CVAE_factory(device=device)
+net, _ = COCO_CVAE_factory(device=device, num_classes=64)
 net.to(device)
 EPOCHS = 400
 learning_rate = 1e-3

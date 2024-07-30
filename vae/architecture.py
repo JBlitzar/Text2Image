@@ -1,7 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+def print_(string):
+    for i in range(10):
+        print("\033[41m"+string)
+    exit()
 class FunctionalToClass(nn.Module):
     def __init__(self, function, *args, **kwargs) -> None:
         self.function = function
@@ -191,9 +194,14 @@ class CVAE(VAE):
     
 
     def encode(self, x, label):
+
+        label = label[:, :self.num_classes]
         
 
         x = self.encoder(x, label)
+
+        if torch.isnan(x).any():
+            print_("NaNs detected in X after encoder")
 
         mean = self.mean_layer(x)
 
@@ -206,6 +214,7 @@ class CVAE(VAE):
         return z, mean, var
     
     def decode(self, z, label):
+        label = label[:, :self.num_classes]
         
 
         
@@ -228,9 +237,7 @@ class CVAE(VAE):
 
 def VAE_loss(x, reconstruction, mean, variance, kl_weight=1):
     #https://github.com/pytorch/examples/blob/main/vae/main.py
-    def print_(string):
-        for i in range(10):
-            print(string)
+    
 
     if torch.isnan(x).any() or torch.isnan(reconstruction).any():
         print_("NaNs detected in reconstruction or x")
