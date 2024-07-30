@@ -83,3 +83,7 @@ Jul 27:
 Jul 28:
 
 - Okay, `xa_clip_fid` is doing ok, but I think its time to pause training. So far, `jxa` is our best, so I'm going to try to code up super-resolution.
+
+Jul 29:
+
+- Coded up, but didn't run super-resolution. Looking back on results and notes, I fear the models are horribly overfit. Like how prompts styled like the testset perform better, and how its only really good at airplanes, baseball, and bathrooms. Perhaps I will revisit coco and try oxfordflowers or CUB for a bit. IDK.
