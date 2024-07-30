@@ -86,4 +86,9 @@ Jul 28:
 
 Jul 29:
 
-- Coded up, but didn't run super-resolution. Looking back on results and notes, I fear the models are horribly overfit. Like how prompts styled like the testset perform better, and how its only really good at airplanes, baseball, and bathrooms. Perhaps I will revisit coco and try oxfordflowers or CUB for a bit. IDK. chatgpt suggestions (cringe) https://chatgpt.com/share/36a0050f-746b-4a29-bb1b-ee0bd96f4923
+- Coded up, but didn't run super-resolution. Looking back on results and notes, I fear the models are horribly overfit. Like how prompts styled like the testset perform better, and how its only really good at airplanes, baseball, and bathrooms. Perhaps I will revisit coco and try oxfordflowers or CUB for a bit. IDK.
+
+Jul 30:
+
+- Here we are, and it's time to change it up. I think I'm going to go with a vq-vae, which is a diffusion model working in the latent space of a VAE. https://paperswithcode.com/paper/vector-quantized-diffusion-model-for-text-to
+- Here's a paper that you can see actually works, so I have confidence in MSCOCO.
