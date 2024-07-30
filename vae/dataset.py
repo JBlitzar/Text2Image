@@ -1,0 +1,97 @@
+import torchvision.datasets as dset
+from torch.utils.data import Dataset, RandomSampler
+from torchvision.transforms import v2
+import torch
+from torch.utils.data import DataLoader
+import glob
+from PIL import Image
+import os
+
+from bert_vectorize import vectorize_text_with_bert as vectorize
+#from clip_vectorize import vectorize_text_with_clip as vectorize
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+
+img_size = 64
+transforms = v2.Compose([
+    #v2.PILToTensor(),
+    v2.ToImage(), 
+    v2.ToDtype(torch.float32, scale=True),
+    v2.Resize(img_size),
+    v2.CenterCrop(size=(img_size, img_size))
+    
+
+])
+
+
+
+class CocoCaptionsDatasetWrapper(Dataset):
+    def __init__(self, root, transform=None, split="train"):
+
+
+
+        super(CocoCaptionsDatasetWrapper, self).__init__()
+
+
+        self.internal_dataset = dset.CocoCaptions(os.path.join(root, f"{split}2017"), os.path.join(root, "annotations", f"captions_{split}2017.json"), transform=transform)
+
+    def __len__(self):
+        return len(self.internal_dataset)
+    
+    def __getitem__(self, idx):
+        img, captions = self.internal_dataset.__getitem__(idx)
+
+        caption = captions[torch.randint(len(captions), (1,)).item()]
+
+        humanreadable_caption = caption
+        
+        caption = vectorize(caption)
+
+
+        return img, caption, humanreadable_caption
+        
+
+
+
+def get_train_dataset():
+    dataset = CocoCaptionsDatasetWrapper(
+        root=os.path.expanduser("~/torch_datasets/coco"),
+        split="train",
+        transform=transforms
+    )
+    return dataset
+
+def get_test_dataset():
+    dataset = CocoCaptionsDatasetWrapper(
+        root=os.path.expanduser("~/torch_datasets/coco"),
+        split="val",
+        transform=transforms
+    )
+    return dataset
+
+def get_random_test_data(amount=1):
+    testset = get_test_dataset()
+
+    sampler = RandomSampler(testset)
+
+    randomloader = DataLoader(testset, sampler=sampler, batch_size=amount)
+
+    return next(iter(randomloader))
+
+
+
+def get_dataloader(dataset, batch_size=64):
+
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+if __name__ == "__main__":
+    
+    print('Number of samples: ', len(get_train_dataset()))
+
+    cap = get_random_test_data()
+    img, label, humanlabel = cap
+
+    print("Image Size: ", img.size())
+    print(humanlabel)
+    print(torch.max(img))
+    print(torch.min(img))
+    print(torch.mean(img))

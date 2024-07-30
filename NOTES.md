@@ -92,3 +92,6 @@ Jul 30:
 
 - Here we are, and it's time to change it up. I think I'm going to go with a vq-vae, which is a diffusion model working in the latent space of a VAE. https://paperswithcode.com/paper/vector-quantized-diffusion-model-for-text-to
 - Here's a paper that you can see actually works, so I have confidence in MSCOCO.
+- So here I am, coding it up (check vae folder). I pasted some stuff in from `JBlitzar/VAE-2`, which gave me a head start, now I'm going to try to get that working out.
+- First roadblock is loss going to infinity then nan. Root of the problem seems to be KL loss.
+- Well, as it goes, I add print statements and suddenly KL isnt exploding anymore. I'll keep an eye on it.
