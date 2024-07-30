@@ -54,29 +54,33 @@ class AllowExtraArguments(nn.Module):
 class ConvLabelEmbedding(nn.Module):                                                                                                                                     
     def __init__(self, num_classes, embedding_dim, repeat_size):                                                                                                                      
         super(ConvLabelEmbedding, self).__init__()                                                                                                                       
-        self.embedding = nn.Embedding(num_classes, embedding_dim) # Linear layer with a few more tricks: Basically a lookup table.
+        self.embedding = nn.Linear(num_classes, embedding_dim) # Linear layer with a few more tricks: Basically a lookup table.
         self.height, self.width = repeat_size                                                                                                
                                                                                                                                                                         
     def forward(self, labels):                                                                                                                            
         # Embed and expand the dimensions to match input spatial dimensions                                                                                              
-        label_embeddings = self.embedding(labels)  # (batch_size, embedding_dim)                                                                                         
-        label_embeddings = label_embeddings.unsqueeze(-1).unsqueeze(-1)  # (batch_size, embedding_dim, 1, 1)                                                             
+        label_embeddings = self.embedding(labels)  # (batch_size, embedding_dim)        
+                                                             
+        label_embeddings = label_embeddings.unsqueeze(-1).unsqueeze(-1)  # (batch_size, embedding_dim, 1, 1)       
+                                                      
         label_embeddings = label_embeddings.expand(-1, -1, self.height, self.width)  # (batch_size, embedding_dim, height, width)                                                  
         return label_embeddings    
 
     def condition_with_label(self, x, label):
+
         embedded_label = self.__call__(label)
         return torch.cat([x, embedded_label], dim=1)                                        
                                                                                                                                                                             
 class DenseLabelEmbedding(nn.Module):                                                                                                                                    
     def __init__(self, num_classes, embedding_dim):                                                                                                                      
         super(DenseLabelEmbedding, self).__init__()                                                                                                                      
-        self.embedding = nn.Embedding(num_classes, embedding_dim)                                                                                                        
+        self.embedding = nn.Linear(num_classes, embedding_dim)                                                                                                        
                                                                                                                                                                         
     def forward(self, labels):                                                                                                                                                                                                                                                    
         return self.embedding(labels)
     
     def condition_with_label(self, x, label):
+
         embedded_label = self.__call__(label)
         return x + embedded_label
     
@@ -97,21 +101,16 @@ class ConvBlock(nn.Module):
 
         self.activation = activation()
 
-        self.emb_layer = nn.Sequential(
-
-            nn.Linear(
-                emb_dim,
-                end
-            ),
-        )
 
         
-    def forward(self, x, label):
+
+        
+    def forward(self, x):
 
         x = self.block(x)
-        emb = self.emb_layer(label)[:, :, None, None].repeat(1, 1, x.shape[-2], x.shape[-1])
+
         
-        return x + emb
+        return x 
 class ConvTransposeBlock(nn.Module):
     def __init__(self, start, end, activation=nn.ReLU, emb_dim=256):
         super().__init__()
@@ -122,19 +121,12 @@ class ConvTransposeBlock(nn.Module):
 
         )
 
-        self.emb_layer = nn.Sequential(
 
-            nn.Linear(
-                emb_dim,
-                end
-            ),
-        )
         
-    def forward(self, x, label):
+    def forward(self, x):
         x = self.block(x)
-        emb = self.emb_layer(label)[:, :, None, None].repeat(1, 1, x.shape[-2], x.shape[-1])
         
-        return x + emb
+        return x 
     
 class VAE(nn.Module):
     def __init__(self, encoder, decoder, hdim, device="cpu", before_latent=None):
@@ -190,15 +182,22 @@ class CVAE(VAE):
         self.num_classes = num_classes
         self.input_size = input_size
 
+        self.class_latent_embedding = DenseLabelEmbedding(num_classes, hdim)
+
+        self.class_encoder_embedding = ConvLabelEmbedding(num_classes, embedding_channels, input_size[-2:]) # Last two are width and height
+
 
     
 
     def encode(self, x, label):
 
         label = label[:, :self.num_classes]
+
+        x = self.class_encoder_embedding.condition_with_label(x, label)
+
         
 
-        x = self.encoder(x, label)
+        x = self.encoder(x)
 
         if torch.isnan(x).any():
             print_("NaNs detected in X after encoder")
@@ -216,10 +215,11 @@ class CVAE(VAE):
     def decode(self, z, label):
         label = label[:, :self.num_classes]
         
-
+        z = self.class_latent_embedding.condition_with_label(z, label)
+        
         
 
-        z = self.decoder(z, label)
+        z = self.decoder(z)
         return z
     
     def forward(self, x, label):
@@ -242,8 +242,8 @@ def VAE_loss(x, reconstruction, mean, variance, kl_weight=1):
     if torch.isnan(x).any() or torch.isnan(reconstruction).any():
         print_("NaNs detected in reconstruction or x")
     
-
-    BCE = F.binary_cross_entropy(reconstruction, x, reduction='sum')
+    BCE = F.mse_loss(x, reconstruction)
+    #BCE = F.binary_cross_entropy(reconstruction, x, reduction='sum')
     if torch.isnan(BCE).any():
         print_("NaNs detected in BCE")
 
@@ -263,11 +263,11 @@ def COCO_CVAE_factory(device="cpu", start_depth=64, num_classes=768):
     hidden_dimension = start_depth*4*8*8
     before_latent=start_depth*4*8*8
     return CVAE(
-        encoder=ConditionedSequential(
+        encoder=nn.Sequential(
 
 
             #64^2, 3
-            ConvBlock(3, start_depth, emb_dim=num_classes),
+            ConvBlock(3+num_classes, start_depth, emb_dim=num_classes),
             ConvBlock(start_depth, start_depth * 2, emb_dim=num_classes),
             ConvBlock(start_depth * 2, start_depth * 4, emb_dim=num_classes), 
 
@@ -278,14 +278,14 @@ def COCO_CVAE_factory(device="cpu", start_depth=64, num_classes=768):
 
             
         ),
-        decoder=ConditionedSequential(
+        decoder=nn.Sequential(
             AllowExtraArguments(nn.Linear(start_depth*4*8*8, start_depth*4*8*8)),
             AllowExtraArguments(nn.ReLU()),
             AllowExtraArguments(nn.Unflatten(1,(start_depth*4,8,8))),
 
             ConvTransposeBlock(start_depth*4, start_depth*2, emb_dim=num_classes),
             ConvTransposeBlock(start_depth*2, start_depth, emb_dim=num_classes),
-            ConvTransposeBlock(start_depth, 3,  emb_dim=num_classes),
+            ConvTransposeBlock(start_depth, 3, activation=nn.Sigmoid,  emb_dim=num_classes),
             
             
 
