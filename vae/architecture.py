@@ -278,7 +278,7 @@ def COCO_CVAE_factory(device="cpu", start_depth=64, num_classes=768):
 
             ConvTransposeBlock(start_depth*4, start_depth*2, emb_dim=num_classes),
             ConvTransposeBlock(start_depth*2, start_depth, emb_dim=num_classes),
-            ConvTransposeBlock(start_depth, 3, activation=nn.Sigmoid, emb_dim=num_classes),
+            ConvTransposeBlock(start_depth, 3,  emb_dim=num_classes),
             
             
 
