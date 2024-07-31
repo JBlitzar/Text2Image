@@ -99,3 +99,4 @@ Jul 30:
 Jul 31:
 
 - Ok, trained VAE overnight and it's as one would expect, pretty good but blurry. I'm going to experiment with vgg loss and see if that's any better (`vae/runs/run_2_vggloss`)
+- Reimplemented vgg loss (`vae/runs/run_3_vggI` (vggImproved)) also set KL weight to 1

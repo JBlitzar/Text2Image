@@ -10,7 +10,7 @@ import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-EXPERIMENT_DIRECTORY = "runs/run2_vggloss"
+EXPERIMENT_DIRECTORY = "runs/run3_vggI"
 
 os.mkdir(EXPERIMENT_DIRECTORY)
 
@@ -27,7 +27,7 @@ dataloader = get_dataloader(get_train_dataset())
 testloader = get_dataloader(get_test_dataset())
 
 
-KL_WEIGHT = 0.002
+KL_WEIGHT = 1#0.002
 
 net, _ = COCO_CVAE_factory(device=device, num_classes=64)
 net.to(device)
