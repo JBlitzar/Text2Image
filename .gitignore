@@ -157,3 +157,4 @@ cython_debug/
 #.idea/
 VAE/ckpt/new_128_16/epoch_150.pt
 VAE/ckpt/new_16x16x16/epoch_167.pt
+vae/runs/run1_cococvae/ckpt/latest.pt
