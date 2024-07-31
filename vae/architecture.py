@@ -247,7 +247,7 @@ def VAE_loss(x, reconstruction, mean, variance, kl_weight=1):
     
     #RECONSTRUCTION = F.mse_loss(x, reconstruction)
     #RECONSTRUCTION = F.binary_cross_entropy(reconstruction, x, reduction='sum')
-    RECONSTRUCTION = vgg_loss(x, reconstruction)
+    RECONSTRUCTION = vgg_loss(x, reconstruction) + F.mse_loss(x, reconstruction)
     if torch.isnan(RECONSTRUCTION).any():
         print_("NaNs detected in reconstruction")
 

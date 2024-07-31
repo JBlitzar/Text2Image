@@ -100,3 +100,7 @@ Jul 31:
 
 - Ok, trained VAE overnight and it's as one would expect, pretty good but blurry. I'm going to experiment with vgg loss and see if that's any better (`vae/runs/run_2_vggloss`)
 - Reimplemented vgg loss (`vae/runs/run_3_vggI` (vggImproved)) also set KL weight to 1
+- Added in MSE loss to the mix, so now reconstruction is MSE + VGG
+- Because VGG loss was looking kind of like randomness. Perhaps tune down KL loss again, because its looking kind of like it's dominating the playing field in terms of losses. Probably not as drastic as 0.002 but like 0.5. Loss is also suspiciously low?? like 0.3 (perhaps cuz of not using BCE) Still repeating noise images, turning KL down to 0.05
+- `vae/runs/run3_vggmsekl`
+- Changed the VGG layers to be [0,1,2,3] because those correspond to fine-grained details
