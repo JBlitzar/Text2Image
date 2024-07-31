@@ -107,3 +107,9 @@ Jul 31:
 - Well, I ran that and it was bad.
 - Perhaps try a smaller one? 16x16x128
 - I am going to try a shallow architecture (`vae/runs/run4_shallowog`)
+- Well, I found something https://theadamcolton.github.io/your-vae-sucks.html and it talks about stable diffusion, so maybe I get a good vae from there
+- BTW found a LAION dataset rehosted (laion took their stuff down from the public https://huggingface.co/datasets/fantasyfish/laion-art)
+- Bruh well the "your vae sucks" article's idea didn't work. Maybe I can just yoink dalle vae?
+- https://github.com/openai/DALL-E/blob/master/notebooks/usage.ipynb
+- Yeah so check it out! https://colab.research.google.com/drive/19R65mTwtacfpAnwMJmrbJ8YZ9o41atmS#scrollTo=VLtw94v76B6j
+- I can totally yoink the dalle vae, and its relatively small (0.5gb pkl sizes)
