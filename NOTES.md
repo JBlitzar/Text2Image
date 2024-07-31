@@ -104,3 +104,6 @@ Jul 31:
 - Because VGG loss was looking kind of like randomness. Perhaps tune down KL loss again, because its looking kind of like it's dominating the playing field in terms of losses. Probably not as drastic as 0.002 but like 0.5. Loss is also suspiciously low?? like 0.3 (perhaps cuz of not using BCE) Still repeating noise images, turning KL down to 0.05
 - `vae/runs/run3_vggmsekl`
 - Changed the VGG layers to be [0,1,2,3] because those correspond to fine-grained details
+- Well, I ran that and it was bad.
+- Perhaps try a smaller one? 16x16x128
+- I am going to try a shallow architecture (`vae/runs/run4_shallowog`)

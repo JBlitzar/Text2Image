@@ -246,8 +246,8 @@ def VAE_loss(x, reconstruction, mean, variance, kl_weight=1):
         print_("NaNs detected in reconstruction or x")
     
     #RECONSTRUCTION = F.mse_loss(x, reconstruction)
-    #RECONSTRUCTION = F.binary_cross_entropy(reconstruction, x, reduction='sum')
-    RECONSTRUCTION = vgg_loss(x, reconstruction) + F.mse_loss(x, reconstruction)
+    RECONSTRUCTION = F.binary_cross_entropy(reconstruction, x, reduction='sum')
+    #RECONSTRUCTION = vgg_loss(x, reconstruction) + F.mse_loss(x, reconstruction)
     if torch.isnan(RECONSTRUCTION).any():
         print_("NaNs detected in reconstruction")
 
@@ -288,6 +288,45 @@ def COCO_CVAE_factory(device="cpu", start_depth=64, num_classes=768):
             AllowExtraArguments(nn.Unflatten(1,(start_depth*4,8,8))),
 
             ConvTransposeBlock(start_depth*4, start_depth*2, emb_dim=num_classes),
+            ConvTransposeBlock(start_depth*2, start_depth, emb_dim=num_classes),
+            ConvTransposeBlock(start_depth, 3, activation=nn.Sigmoid,  emb_dim=num_classes),
+            
+            
+
+
+
+
+        ),
+        hdim=hidden_dimension,
+        num_classes=num_classes,
+        input_size=(3,64,64),
+        before_latent=before_latent,
+        device=device,
+        embedding_channels=num_classes
+    ), hidden_dimension
+def COCO_CVAE_Shallow_factory(device="cpu", start_depth=64, num_classes=768):
+    hidden_dimension = start_depth*2*16*16
+    before_latent=start_depth*2*16*16
+    return CVAE(
+        encoder=nn.Sequential(
+
+
+            #64^2, 3
+            ConvBlock(3+num_classes, start_depth, emb_dim=num_classes),
+            ConvBlock(start_depth, start_depth * 2, emb_dim=num_classes),
+
+
+            AllowExtraArguments(nn.Flatten()),
+            AllowExtraArguments(nn.Linear(start_depth*2*16*16, start_depth*2*16*16)),
+            AllowExtraArguments(nn.ReLU()),
+
+            
+        ),
+        decoder=nn.Sequential(
+            AllowExtraArguments(nn.Linear(start_depth*2*16*16, start_depth*2*16*16)),
+            AllowExtraArguments(nn.ReLU()),
+            AllowExtraArguments(nn.Unflatten(1,(start_depth*2,16,16))),
+
             ConvTransposeBlock(start_depth*2, start_depth, emb_dim=num_classes),
             ConvTransposeBlock(start_depth, 3, activation=nn.Sigmoid,  emb_dim=num_classes),
             

@@ -1,4 +1,4 @@
-from architecture import VAE_loss, COCO_CVAE_factory
+from architecture import VAE_loss, COCO_CVAE_factory, COCO_CVAE_Shallow_factory
 from dataset import get_train_dataset, get_test_dataset, get_dataloader    
 import torch
 from tqdm import tqdm, trange
@@ -10,7 +10,7 @@ import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-EXPERIMENT_DIRECTORY = "runs/run3_vggmsekl"
+EXPERIMENT_DIRECTORY = "runs/run4_shallowog"
 
 os.mkdir(EXPERIMENT_DIRECTORY)
 
@@ -29,7 +29,7 @@ testloader = get_dataloader(get_test_dataset())
 
 KL_WEIGHT = 0.05#1#0.002
 
-net, _ = COCO_CVAE_factory(device=device, num_classes=64)
+net, _ = COCO_CVAE_Shallow_factory(device=device, num_classes=64, start_depth=32)
 net.to(device)
 EPOCHS = 400
 learning_rate = 1e-3
