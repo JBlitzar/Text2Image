@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from vgg_loss import VGGPerceptualLoss
 def print_(string):
     for i in range(10):
         print("\033[41m"+string)
@@ -234,6 +235,8 @@ class CVAE(VAE):
 
 
     
+vgg_loss = VGGPerceptualLoss()
+vgg_loss.to("mps") # TODO: remove hacky device movement
 
 def VAE_loss(x, reconstruction, mean, variance, kl_weight=1):
     #https://github.com/pytorch/examples/blob/main/vae/main.py
@@ -242,10 +245,11 @@ def VAE_loss(x, reconstruction, mean, variance, kl_weight=1):
     if torch.isnan(x).any() or torch.isnan(reconstruction).any():
         print_("NaNs detected in reconstruction or x")
     
-    BCE = F.mse_loss(x, reconstruction)
-    #BCE = F.binary_cross_entropy(reconstruction, x, reduction='sum')
-    if torch.isnan(BCE).any():
-        print_("NaNs detected in BCE")
+    #RECONSTRUCTION = F.mse_loss(x, reconstruction)
+    #RECONSTRUCTION = F.binary_cross_entropy(reconstruction, x, reduction='sum')
+    RECONSTRUCTION = vgg_loss(x, reconstruction)
+    if torch.isnan(RECONSTRUCTION).any():
+        print_("NaNs detected in reconstruction")
 
     # see Appendix B from VAE paper:
     # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
@@ -256,7 +260,7 @@ def VAE_loss(x, reconstruction, mean, variance, kl_weight=1):
     KLD = -0.5 * torch.sum(1 + variance - mean.pow(2) - variance.exp())
     if torch.isnan(KLD).any():
         print_("NaNs detected in KLD")
-    return BCE + KLD * kl_weight, BCE, KLD * kl_weight
+    return RECONSTRUCTION + KLD * kl_weight, RECONSTRUCTION, KLD * kl_weight
 
 
 def COCO_CVAE_factory(device="cpu", start_depth=64, num_classes=768):

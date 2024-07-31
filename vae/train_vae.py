@@ -10,7 +10,7 @@ import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
 
-EXPERIMENT_DIRECTORY = "runs/run1_cococvae"
+EXPERIMENT_DIRECTORY = "runs/run2_vggloss"
 
 os.mkdir(EXPERIMENT_DIRECTORY)
 
@@ -87,7 +87,8 @@ for epoch in trange(EPOCHS):
     running_total_reconstruction_test = 0
     with torch.no_grad():
         if testloader != None:
-            for batch, labels in tqdm(testloader, leave=False):
+            for batch, labels, _ in tqdm(testloader, leave=False):
+                del _ #unused
 
                 batch = batch.to(device)
 
@@ -106,7 +107,7 @@ for epoch in trange(EPOCHS):
                 "Loss/Test":running_total_test/num_test_runs,
                 "Loss/Test/KL": running_total_kl_test/num_test_runs,
                 "Loss/Test/Reconstruction": running_total_reconstruction_test / num_test_runs
-            })
+            }, epoch)
     print()
     print(f"Loss: {running_total/num_runs}")
 
