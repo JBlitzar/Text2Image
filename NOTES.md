@@ -113,3 +113,6 @@ Jul 31:
 - https://github.com/openai/DALL-E/blob/master/notebooks/usage.ipynb
 - Yeah so check it out! https://colab.research.google.com/drive/19R65mTwtacfpAnwMJmrbJ8YZ9o41atmS#scrollTo=VLtw94v76B6j
 - I can totally yoink the dalle vae, and its relatively small (0.5gb pkl sizes)
+- _a little bit_ cheaty, but I still have to make the actual model, and its nice that it's pretrained
+
+- Meh I'm just going to train `run3_jxa` to hope to feel better about myself and maybe it'll magically become amazing

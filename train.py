@@ -10,7 +10,7 @@ from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 20
+RESUME = 47
 
 
 IS_TEMP = False
@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_4_xa_clip_fid"
+EXPERIMENT_DIRECTORY = "runs/run_3_jxa"
 
 
 
@@ -46,7 +46,7 @@ epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
 net = UNet_conditional(num_classes=768)
-
+print(net)
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
 

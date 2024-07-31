@@ -11,7 +11,7 @@ from bert_vectorize import vectorize_text_with_bert as vectorize
 #from clip_vectorize import vectorize_text_with_clip as vectorize
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
-img_size = 128
+img_size = 64
 transforms = v2.Compose([
     #v2.PILToTensor(),
     v2.ToImage(), 
