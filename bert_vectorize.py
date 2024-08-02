@@ -18,6 +18,16 @@ def vectorize_text_with_bert(text):# from hf docs
 
     return text_representation
 
+
+import gc
+def cleanup():
+    global model
+    global tokenizer
+    del model
+    del tokenizer
+    gc.collect()
+
+    
 if __name__ == "__main__":
     text = "A man walking down the street with a dog holding a balloon in one hand."
     text_representation = vectorize_text_with_bert(text)

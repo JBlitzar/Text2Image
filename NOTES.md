@@ -116,3 +116,7 @@ Jul 31:
 - _a little bit_ cheaty, but I still have to make the actual model, and its nice that it's pretrained
 
 - Meh I'm just going to train `run3_jxa` to hope to feel better about myself and maybe it'll magically become amazing
+
+Aug 2:
+
+- I have a genius plan for increasing quality for outputs of the text to image model. Generate lots, automated select best of n

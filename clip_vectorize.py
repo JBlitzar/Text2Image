@@ -1,6 +1,7 @@
 
 from transformers import AutoTokenizer, CLIPTextModelWithProjection
 import torch
+
 model = CLIPTextModelWithProjection.from_pretrained("openai/clip-vit-base-patch32")
 tokenizer = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
 model.eval()
@@ -17,7 +18,13 @@ def vectorize_text_with_clip(text):# from hf docs
 
     return outputs.text_embeds.squeeze(0)
 
-
+import gc
+def cleanup():
+    global model
+    global tokenizer
+    del model
+    del tokenizer
+    gc.collect()
 
 if __name__ == "__main__":
     text = "A man walking down the street with a dog holding a balloon in one hand."
