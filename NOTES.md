@@ -120,3 +120,8 @@ Jul 31:
 Aug 2:
 
 - I have a genius plan for increasing quality for outputs of the text to image model. Generate lots, automated select best of n
+- Done (clip_score, infer.py changes)
+
+Aug 3:
+
+- More trainign, its prob overfit because FID went up, but we always have run3jxa (nonresumed). Lets see how far this goes. I could just be wasting cpu time, and I prob am. Bestof is looking good
