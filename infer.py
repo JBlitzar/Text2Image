@@ -35,17 +35,17 @@ def infer(prompt, amt=1, topn=8):
 
     path = os.path.join(EXPERIMENT_DIRECTORY, "inferred", re.sub(r'[^a-zA-Z\s]', '', prompt).replace(" ", "_")+str(int(time.time()))+".png")
 
-    vprompt = torch.randn((1,768)) #vectorize_text_with_bert(prompt).unsqueeze(0)
+    vprompt = vectorize_text_with_bert(prompt).unsqueeze(0)
 
     generated = wrapper.sample(64, vprompt, amt=amt).detach().cpu()
 
     generated, _ = select_top_n_images(generated, prompt, n=topn)
 
-    save_grid_with_label(torchvision.utils.make_grid(generated),prompt, path)
+    save_grid_with_label(torchvision.utils.make_grid(generated),prompt + f"({topn} best of {amt})", path)
 
 
 def run_jobs():
-    n=8
+    n=32
     bestof=8
     print(f"using best {bestof} of {n}")
     processed_tasks = set()

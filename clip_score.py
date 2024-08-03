@@ -1,7 +1,7 @@
 import torch
 from transformers import CLIPProcessor, CLIPModel
 import gc
-
+from torchvision.transforms.functional import resize
 
 # https://huggingface.co/docs/transformers/en/model_doc/clip
 def select_top_n_images(image_tensors: torch.Tensor, text: str, n: int, model_name='openai/clip-vit-base-patch32') -> torch.Tensor:
@@ -18,7 +18,7 @@ def select_top_n_images(image_tensors: torch.Tensor, text: str, n: int, model_na
     
 
     device = model.device
-    image_tensors = image_tensors.to(device)
+    image_tensors = resize(image_tensors.to(device),(224,224)) # because skill issue clip can only deal with 224^2 images
     inputs = {k: v.to(device) for k, v in inputs.items()}
     
 

@@ -10,7 +10,7 @@ from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 24
+RESUME = 35
 
 
 IS_TEMP = False
@@ -133,7 +133,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
         pbar.set_description(f"Loss: {'%.4f' % loss}")
         if step % 1000 == 999:
-            generate_sample_save_images(f"epoch_{epoch}_step_{step}.png")
+            generate_sample_save_images(f"epoch_{epoch}_step_{step}.jpg")
             generated, data = generate_imgs_for_fid()
             print(generated.shape)
             print(data.shape)
