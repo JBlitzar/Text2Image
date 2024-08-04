@@ -125,3 +125,6 @@ Aug 2:
 Aug 3:
 
 - More trainign, its prob overfit because FID went up, but we always have run3jxa (nonresumed). Lets see how far this goes. I could just be wasting cpu time, and I prob am. Bestof is looking good
+- Low batch size might be to blame for noisiness
+- Funny funny technique: gradient accumulation!
+- starting up run5_xa_acc, simulating batch size 128 with also actual batch size 32 (batch 32, acc 4 = simulated 128)

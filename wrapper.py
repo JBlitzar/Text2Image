@@ -169,7 +169,7 @@ class DiffusionManager(nn.Module):
             for i in range(10):
                 print(string)
 
-        optimizer.zero_grad()
+
 
         batch = batch.to(self.device)
 
@@ -195,7 +195,7 @@ class DiffusionManager(nn.Module):
             print_("NaNs detected in the loss")
 
         loss.backward()
-        optimizer.step()
+
 
         return loss.item()
     
