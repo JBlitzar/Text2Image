@@ -20,9 +20,9 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_5_xa_acc"
+EXPERIMENT_DIRECTORY = "runs/run_5_xa_lr"
 
-ACCUMULATION_STEPS = 4
+ACCUMULATION_STEPS = 1
 
 
 
@@ -41,7 +41,7 @@ if not IS_TEMP and RESUME == 0:
 
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
-dataloader = get_dataloader(get_train_dataset(), batch_size=32)
+dataloader = get_dataloader(get_train_dataset(), batch_size=16)
 
 metric = FrechetInceptionDistance(device="cpu") # NotImplementedError: The operator 'aten::_linalg_eigvals' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.
 epoch_step_metric = FrechetInceptionDistance(device="cpu")
@@ -56,13 +56,14 @@ if RESUME > 0:
 
 net.to(device)
 
+
 wrapper = DiffusionManager(net, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
 
 EPOCHS = 50
 if IS_TEMP:
     EPOCHS = 5
-learning_rate = 3e-4
+learning_rate = 1e-4#3e-4
 
 
 
@@ -120,13 +121,15 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
 
     metric.reset()
-    optimizer.zero_grad()
+    #optimizer.zero_grad()
     for step, (batch, label, _) in enumerate(pbar := tqdm(dataloader, dynamic_ncols=True)):
         epoch_step_metric.reset()
 
-        
+        optimizer.zero_grad()
 
         loss = wrapper.training_loop_iteration(optimizer, batch, label, criterion)
+
+        optimizer.step()
 
         running_total += loss
         
@@ -139,9 +142,9 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
         pbar.set_description(f"Loss: {'%.4f' % loss}")
         
-        if step % ACCUMULATION_STEPS == ACCUMULATION_STEPS - 1:
-            optimizer.step()
-            optimizer.zero_grad()
+        # if step % ACCUMULATION_STEPS == ACCUMULATION_STEPS - 1:
+        #     optimizer.step()
+        #     optimizer.zero_grad()
 
 
 
@@ -169,9 +172,9 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
                     torch.save(net.state_dict(),f)
 
 
-    # just in case
-    optimizer.step()
-    optimizer.zero_grad()
+    # # just in case
+    # optimizer.step()
+    # optimizer.zero_grad()
     
     
 

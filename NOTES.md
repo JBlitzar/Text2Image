@@ -125,6 +125,12 @@ Aug 2:
 Aug 3:
 
 - More trainign, its prob overfit because FID went up, but we always have run3jxa (nonresumed). Lets see how far this goes. I could just be wasting cpu time, and I prob am. Bestof is looking good
+
+Aug 4
+
 - Low batch size might be to blame for noisiness
 - Funny funny technique: gradient accumulation!
-- starting up run5_xa_acc, simulating batch size 128 with also actual batch size 32 (batch 32, acc 4 = simulated 128)
+- starting up `run5_xa_acc`, simulating batch size 128 with also actual batch size 32 (batch 32, acc 4 = simulated 128)
+- Yeah, so the loss stayed >1 on that one, so instead I'm going to try smaller lr.
+- Investigated torch.compile, doesn't work on mps :\
+- Anyways going to run `run5_xa_lr`

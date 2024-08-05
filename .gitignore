@@ -161,3 +161,4 @@ cython_debug/
 VAE/ckpt/new_128_16/epoch_150.pt
 VAE/ckpt/new_16x16x16/epoch_167.pt
 vae/runs/run1_cococvae/ckpt/latest.pt
+runs/run_5_xa_lr/ckpt/latest.pt
