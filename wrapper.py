@@ -200,3 +200,81 @@ class DiffusionManager(nn.Module):
         return loss.item()
     
 
+
+
+class ImplicitDiffusionManager(DiffusionManager):
+    
+    def __init__(self, model: nn.Module, noise_steps=1000, start=0.0001, end=0.02, device="cpu", **kwargs) -> None:
+        super().__init__(model, noise_steps, start, end, device, **kwargs)
+
+
+    def sample(self, img_size, condition, amt=5, use_tqdm=True, sampling_steps=100, sigma=0): # Sigma represents stochasticity. Zero = deterministic
+        if tuple(condition.shape)[0] < amt:
+            condition = condition.repeat(amt, 1)
+
+        self.model.eval()
+        condition = condition.to(self.device)
+        my_trange = lambda x, y, z: trange(x, y, z, leave=False, dynamic_ncols=True)
+        fn = my_trange if use_tqdm else range
+
+        with torch.no_grad():
+            cur_img = torch.randn((amt, 3, img_size, img_size)).to(self.device)
+            for i in fn(sampling_steps-1, 0, -1):
+                timestep = torch.ones(amt) * i
+                timestep = timestep.to(self.device)
+                predicted_image = self.model(cur_img, timestep, condition)
+                if i > 0:
+                    _, _, alpha_hat_prev = self.get_schedule_at(i-1)
+                    cur_img = torch.sqrt(alpha_hat_prev) * predicted_image + torch.sqrt(1 - alpha_hat_prev - sigma**2) * torch.randn_like(cur_img)
+                else:
+                    cur_img = predicted_image
+        self.model.train()
+        return cur_img
+
+    def sample_multicond(self, img_size, condition, use_tqdm=True, sampling_steps=100, sigma=0):
+        num_conditions = condition.shape[0]
+        amt = num_conditions
+        self.model.eval()
+        condition = condition.to(self.device)
+        my_trange = lambda x, y, z: trange(x, y, z, leave=False, dynamic_ncols=True)
+        fn = my_trange if use_tqdm else range
+
+        with torch.no_grad():
+            cur_img = torch.randn((amt, 3, img_size, img_size)).to(self.device)
+            for i in fn(sampling_steps-1, 0, -1):
+                timestep = torch.ones(amt) * i
+                timestep = timestep.to(self.device)
+                predicted_image = self.model(cur_img, timestep, condition)
+                if i > 0:
+                    _, _, alpha_hat_prev = self.get_schedule_at(i-1)
+                    cur_img = torch.sqrt(alpha_hat_prev) * predicted_image + torch.sqrt(1 - alpha_hat_prev - sigma **2) * torch.randn_like(cur_img)
+                else:
+                    cur_img = predicted_image
+        self.model.train()
+        return cur_img
+
+    def training_loop_iteration(self, batch, label, criterion):
+        def print_(string):
+            for i in range(10):
+                print(string)
+        
+        batch = batch.to(self.device)
+        label = label.to(self.device)
+        timesteps = self.random_timesteps(batch.shape[0]).to(self.device)
+        noisy_batch, real_noise = self.noise_image(batch, timesteps)
+
+        if torch.isnan(noisy_batch).any() or torch.isnan(real_noise).any():
+            print_("NaNs detected in the noisy batch or real noise")
+
+        pred_image = self.model(noisy_batch, timesteps, label)
+
+        if torch.isnan(pred_image).any():
+            print_("NaNs detected in the predicted image")
+
+        loss = criterion(batch, pred_image)
+
+        if torch.isnan(loss).any():
+            print_("NaNs detected in the loss")
+
+        loss.backward()
+        return loss.item()

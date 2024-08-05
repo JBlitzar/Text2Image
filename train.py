@@ -5,7 +5,7 @@ import torch
 from tqdm import tqdm, trange
 from logger import log_data, init_logger, log_img, save_grid_with_label
 import torchvision
-from wrapper import DiffusionManager, Schedule
+from wrapper import DiffusionManager, Schedule, ImplicitDiffusionManager
 from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_5_xa_lr"
+EXPERIMENT_DIRECTORY = "runs/run_6_ddim_xa"
 
 ACCUMULATION_STEPS = 1
 
@@ -30,12 +30,23 @@ ACCUMULATION_STEPS = 1
 
 
 if not IS_TEMP and RESUME == 0:
+    try:
 
-    os.mkdir(EXPERIMENT_DIRECTORY)
+        os.mkdir(EXPERIMENT_DIRECTORY)
 
-    os.mkdir(EXPERIMENT_DIRECTORY+"/ckpt")
+        os.mkdir(EXPERIMENT_DIRECTORY+"/ckpt")
 
-    os.mkdir(EXPERIMENT_DIRECTORY+"/train_img")
+        os.mkdir(EXPERIMENT_DIRECTORY+"/train_img")
+    except FileExistsError as e:
+        print(f"FileExistsError caught ({EXPERIMENT_DIRECTORY})")
+        file_count = sum([len(files) for root, dirs, files in os.walk(EXPERIMENT_DIRECTORY)])
+        print(f"File count: {file_count}")
+        if file_count <= 1:
+            pass
+        else:
+            print("Exiting.")
+            exit()
+
 
 
 
@@ -57,13 +68,13 @@ if RESUME > 0:
 net.to(device)
 
 
-wrapper = DiffusionManager(net, device=device, noise_steps=1000)
+wrapper = ImplicitDiffusionManager(net, device=device, noise_steps=1000)#DiffusionManager(net, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
 
 EPOCHS = 50
 if IS_TEMP:
     EPOCHS = 5
-learning_rate = 1e-4#3e-4
+learning_rate = 3e-4
 
 
 
@@ -127,7 +138,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
         optimizer.zero_grad()
 
-        loss = wrapper.training_loop_iteration(optimizer, batch, label, criterion)
+        loss = wrapper.training_loop_iteration(batch, label, criterion)
 
         optimizer.step()
 

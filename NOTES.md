@@ -134,3 +134,9 @@ Aug 4
 - Yeah, so the loss stayed >1 on that one, so instead I'm going to try smaller lr.
 - Investigated torch.compile, doesn't work on mps :\
 - Anyways going to run `run5_xa_lr`
+
+Aug 5
+
+- Perhaps try DDIM https://arxiv.org/pdf/2010.02502 that predicts the noise instead, then we can also incorporate perceptual loss perhaps
+- https://ar5iv.labs.arxiv.org/html/2010.02502, https://nn.labml.ai/diffusion/stable_diffusion/sampler/ddim.html gives us the sampling equation
+- Made ImplicitDiffusionManager. Experiment one: no change, just using implicit. Experiment 2 will be using vgg loss a little bit as well
