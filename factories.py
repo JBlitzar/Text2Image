@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 class EMA:
-    def __init__(self, beta):
+    def __init__(self, beta=0.99):
         super().__init__()
         self.beta = beta
         self.step = 0
