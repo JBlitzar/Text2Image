@@ -217,7 +217,7 @@ class ImplicitDiffusionManager(DiffusionManager):
         super().__init__(model, noise_steps, start, end, device, **kwargs)
 
 
-    def sample(self, img_size, condition, amt=5, use_tqdm=True, eta=0.0, sample_steps=100): # https://github.com/Alokia/diffusion-DDIM-pytorch/blob/master/utils/engine.py
+    def sample(self, img_size, condition, amt=5, use_tqdm=True, eta=0.0, sample_steps=1000): # https://github.com/Alokia/diffusion-DDIM-pytorch/blob/master/utils/engine.py
         if tuple(condition.shape)[0] < amt:
             condition = condition.repeat(amt, 1)
 
@@ -250,7 +250,7 @@ class ImplicitDiffusionManager(DiffusionManager):
         self.model.train()
         return cur_img
 
-    def sample_multicond(self, img_size, condition, eta=0.0, use_tqdm=True, sample_steps=100):
+    def sample_multicond(self, img_size, condition, eta=0.0, use_tqdm=True, sample_steps=1000):
         num_conditions = condition.shape[0]
         amt = num_conditions
         self.model.eval()
