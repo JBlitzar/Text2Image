@@ -7,7 +7,7 @@ from tqdm import trange
 
 
 
-Schedule = Enum('Schedule', ['LINEAR', 'COSINE'])
+Schedule = Enum('Schedule', ['LINEAR', 'COSINE', 'QUADRATIC'])
 
 class DiffusionManager(nn.Module):
     def __init__(self, model: nn.Module, noise_steps=1000, start=0.0001, end=0.02, device="cpu", **kwargs ) -> None:
@@ -48,6 +48,15 @@ class DiffusionManager(nn.Module):
             
             t = torch.minimum(t, torch.ones_like(t) * 0.999) #"In practice, we clip β_t to be no larger than 0.999 to prevent singularities at the end of the diffusion process n"
 
+            return t
+        elif schedule_type == Schedule.QUADRATIC: # https://arxiv.org/pdf/2006.09011
+
+            def quadratic_schedule(t, a=0.25, b=0.15, c=0.0):
+                return a * t**2 + b * t + c
+            
+            t = torch.linspace(0, 1, self.noise_steps)
+            t = quadratic_schedule(t)
+            t = torch.minimum(t, torch.ones_like(t) * 0.999)  # Clip β_t to prevent singularities
             return t
     
     def set_schedule(self, schedule: Schedule = Schedule.LINEAR):
@@ -274,7 +283,7 @@ class ImplicitDiffusionManager(DiffusionManager):
         return cur_img
 
     def training_loop_iteration(self, batch, label, criterion):
-        
+
         batch = batch.to(self.device)
         label = label.to(self.device)
         timesteps = self.random_timesteps(batch.shape[0]).to(self.device)
