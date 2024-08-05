@@ -140,3 +140,5 @@ Aug 5
 - Perhaps try DDIM https://arxiv.org/pdf/2010.02502 that predicts the noise instead, then we can also incorporate perceptual loss perhaps
 - https://ar5iv.labs.arxiv.org/html/2010.02502, https://nn.labml.ai/diffusion/stable_diffusion/sampler/ddim.html gives us the sampling equation
 - Made ImplicitDiffusionManager. Experiment one: no change, just using implicit. Experiment 2 will be using vgg loss a little bit as well
+- Well, that was a bust. I'm going to remove it from history, but you can always find it @ ffae316
+- Re-coding with https://github.com/Alokia/diffusion-DDIM-pytorch/blob/master/utils/engine.py as ref
