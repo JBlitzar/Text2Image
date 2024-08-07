@@ -144,3 +144,5 @@ Aug 5
 - Re-coding with https://github.com/Alokia/diffusion-DDIM-pytorch/blob/master/utils/engine.py as ref
 - Added option for quadratic schedule (https://arxiv.org/pdf/2006.09011)
 - Latent diffusion might actually be better because its meant to represent features well
+- Well, ddim run didn't really work.
+-
