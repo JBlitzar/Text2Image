@@ -13,9 +13,9 @@ class VGGPerceptualLoss(nn.Module):
         blocks.append(models.vgg16(pretrained=True).features[4:9].eval())
         blocks.append(models.vgg16(pretrained=True).features[9:16].eval())
         blocks.append(models.vgg16(pretrained=True).features[16:23].eval())
-        for bl in blocks:
-            for p in bl.parameters():
-                p.requires_grad = False
+        # for bl in blocks:
+        #     for p in bl.parameters():
+        #         p.requires_grad = False
         self.blocks = torch.nn.ModuleList(blocks)
         self.transform = torch.nn.functional.interpolate
         self.resize = resize

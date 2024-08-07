@@ -340,6 +340,6 @@ class UNet_conditional(nn.Module):
 
 
 
-        #output = F.sigmoid(x)
+        output = F.sigmoid(output)
         return output
 

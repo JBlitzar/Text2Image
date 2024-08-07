@@ -212,11 +212,12 @@ class DiffusionManager(nn.Module):
 
 
 class ImplicitDiffusionManager(DiffusionManager):
+    #TODO: Check equations
 
     def __init__(self, model: nn.Module, noise_steps=1000, start=0.0001, end=0.02, device="cpu", **kwargs) -> None:
         super().__init__(model, noise_steps, start, end, device, **kwargs)
 
-
+    #TODO: easy: change sample_steps to not take in and use self.noise_steps, or make a better schedule handing thing
     def sample(self, img_size, condition, amt=5, use_tqdm=True, eta=0.0, sample_steps=1000): # https://github.com/Alokia/diffusion-DDIM-pytorch/blob/master/utils/engine.py
         if tuple(condition.shape)[0] < amt:
             condition = condition.repeat(amt, 1)
@@ -237,8 +238,9 @@ class ImplicitDiffusionManager(DiffusionManager):
                 predicted_image = self.model(cur_img, timestep, condition)
                 beta, alpha, alpha_hat = self.get_schedule_at(i)
                 beta_prev, alpha_prev, alpha_hat_prev = self.get_schedule_at(i - 1) if i > 0 else (torch.tensor(0.0), torch.tensor(1.0), torch.tensor(1.0))
-
-                sigma_t = eta * torch.sqrt((1 - alpha_hat_prev) / (1 - alpha_hat) * (1 - alpha_hat / alpha_hat_prev))
+                sigma_t = 0.0
+                if eta != 0.0:
+                    sigma_t = eta * torch.sqrt((1 - alpha_hat_prev) / (1 - alpha_hat) * (1 - alpha_hat / alpha_hat_prev))
                 noise = torch.randn_like(cur_img) if i > 0 else torch.zeros_like(cur_img)
 
                 cur_img = (
