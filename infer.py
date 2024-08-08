@@ -11,7 +11,7 @@ from clip_score import select_top_n_images
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_3_jxa_resumed"
+EXPERIMENT_DIRECTORY = "runs/run_3_jxa"
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 try:
