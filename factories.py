@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 class EMA:
-    def __init__(self, beta=0.99):
+    def __init__(self, beta):
         super().__init__()
         self.beta = beta
         self.step = 0
@@ -283,7 +283,6 @@ class UNet_conditional(nn.Module):
             10000
             ** (torch.arange(0, channels, 2, device=self.device).float() / channels)
         )
-        inv_freq = inv_freq.to(self.device)
         pos_enc_a = torch.sin(t.repeat(1, channels // 2) * inv_freq)
         pos_enc_b = torch.cos(t.repeat(1, channels // 2) * inv_freq)
         pos_enc = torch.cat([pos_enc_a, pos_enc_b], dim=-1)
@@ -340,6 +339,5 @@ class UNet_conditional(nn.Module):
 
 
 
-        output = F.sigmoid(output)
+        #output = F.sigmoid(x)
         return output
-

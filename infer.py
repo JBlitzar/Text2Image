@@ -11,7 +11,7 @@ from clip_score import select_top_n_images
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_3_jxa"
+EXPERIMENT_DIRECTORY = "runs/run_3_jxa_resumed"
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 try:
@@ -23,7 +23,7 @@ net = UNet_conditional(num_classes=768)
 net.to(device)
 net.load_state_dict(torch.load(os.path.join(EXPERIMENT_DIRECTORY, "ckpt/latest.pt")))
 def count_parameters(model):
-    return format(torch.tensor([p.numel() for p in model.parameters() if p.requires_grad]).sum().item(),",d")
+    return torch.tensor([p.numel() for p in model.parameters() if p.requires_grad]).sum().item()
 print(f"Parameters: {count_parameters(net)}")
 
 
@@ -45,8 +45,8 @@ def infer(prompt, amt=1, topn=8):
 
 
 def run_jobs():
-    n=32
-    bestof=8
+    n=1
+    bestof=1
     print(f"using best {bestof} of {n}")
     processed_tasks = set()
     def read_jobs():
