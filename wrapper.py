@@ -232,7 +232,7 @@ class ImplicitDiffusionManager(DiffusionManager):
             for i in fn(sample_steps-1, 0, -1):
                 timestep = torch.ones(amt) * i
                 timestep = timestep.to(self.device)
-                prev_timestep = torch.ones(amt) * (i + 1) if i > 0 else torch.zeros_like(timestep)
+                prev_timestep = torch.ones(amt) * (i - 1) if i > 0 else torch.zeros_like(timestep) #ISTG A SINGLE SIGN ERROR
                 prev_timestep = prev_timestep.to(self.device)
 
                 predicted_image = self.model(cur_img, timestep, condition)

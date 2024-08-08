@@ -23,7 +23,7 @@ net = UNet_conditional(num_classes=768)
 net.to(device)
 net.load_state_dict(torch.load(os.path.join(EXPERIMENT_DIRECTORY, "ckpt/latest.pt")))
 def count_parameters(model):
-    return torch.tensor([p.numel() for p in model.parameters() if p.requires_grad]).sum().item()
+    return format(torch.tensor([p.numel() for p in model.parameters() if p.requires_grad]).sum().item(),",d")
 print(f"Parameters: {count_parameters(net)}")
 
 

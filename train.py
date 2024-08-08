@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_6_ddim_xa"
+EXPERIMENT_DIRECTORY = "runs/run_7_ddim_xa_rerun"
 
 ACCUMULATION_STEPS = 1
 
