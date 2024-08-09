@@ -177,4 +177,6 @@ Aug 9:
 - Old architecture at v2_architecture, old traininer at v2_trainer.
 - The efficient architecture has 1 million less parameters :skull: (380 million vs 379 million)
 - I'm going to naively just train this. run_8_large_t5_efficient, here we go!
-- Python isnt actually using much more memory than before, however eta for an epoch is 2 hours (double) which is understandable, given 12x model size lol
+- Python isnt actually using much more memory than before, however eta for an epoch is 2 hours (double) which is understandable, given 12x model size lol.
+- Well, now we let it train for 3 days and wait I guess.
+- Loss 0.03 after 2k steps
