@@ -45,8 +45,8 @@ def infer(prompt, amt=1, topn=8):
 
 
 def run_jobs():
-    n=1
-    bestof=1
+    n=8
+    bestof=32
     print(f"using best {bestof} of {n}")
     processed_tasks = set()
     def read_jobs():

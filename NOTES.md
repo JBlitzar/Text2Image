@@ -145,4 +145,21 @@ Aug 5
 - Added option for quadratic schedule (https://arxiv.org/pdf/2006.09011)
 - Latent diffusion might actually be better because its meant to represent features well
 - Well, ddim run didn't really work.
--
+- Panic that inference didn't work, resolved by commenting out a sigmoid
+
+Thoughts:
+
+Revisit if discouraged:
+
+- p3 DEbug VGG loss? numbers are clamped weirdly (really small, wrong range, -1-1 vs 0-1 vs 0-255) nonsense gray feels like a scaling issue
+- p3 Get vqvae code working, depending on how feasable
+
+Do now in order:
+
+- p2 Start simple, simple problem, t2i is really hard. Hard to have a fast prototyping cycle. Simplest dataset? flickr, coco. MNIST for t2i vibes.
+- p2 Bigger dataset, or subset (like CUB).
+- (if it arises, research, but long term to think abt) Big problem is large model. Large model means more ram, ? Get access to gpu somehow (colab or lambda or aws or smth). Research a good method, would get better results.
+- p1 Larger architecture? 25m might be small
+- Read imagen paper? we are basically replicating that workflow
+- p0 https://arxiv.org/pdf/2205.11487 4.4 we need a bigger text encoder? Get a really big bert or try to get t5
+- p0 "efficient" design means to slap downsample/upsample on either end of the unet because less parameters
