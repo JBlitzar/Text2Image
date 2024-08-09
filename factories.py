@@ -434,7 +434,7 @@ class UNet_conditional_efficient(nn.Module):
         return output
 
 if __name__ == "__main__":
-    net = UNet_conditional_efficient(num_classes=1024).to("mps")
+    net = UNet_conditional_large(num_classes=1024).to("mps")
 
     def count_parameters(model):
         return torch.tensor([p.numel() for p in model.parameters() if p.requires_grad]).sum().item()

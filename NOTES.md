@@ -175,3 +175,4 @@ Aug 9:
 
 - Coded up the efficient design and made it lager by increasing start depth and adding another layer of depth. Switched bert to t5 large.
 - Old architecture at v2_architecture, old traininer at v2_trainer.
+- The efficient architecture has 1 million less parameters :skull: (380 million vs 379 million)
