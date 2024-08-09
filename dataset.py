@@ -7,7 +7,8 @@ import glob
 from PIL import Image
 import os
 
-from bert_vectorize import vectorize_text_with_bert as vectorize
+from t5_vectorize import vectorize_text_with_t5 as vectorize
+#from bert_vectorize import vectorize_text_with_bert as vectorize
 #from clip_vectorize import vectorize_text_with_clip as vectorize
 device = "mps" if torch.backends.mps.is_available() else "cpu"
 

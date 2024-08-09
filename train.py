@@ -1,4 +1,4 @@
-from factories import UNet_conditional
+from factories import UNet_conditional_efficient
 import re
 from dataset import get_train_dataset, get_dataloader, get_random_test_data
 import torch
@@ -20,7 +20,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_7_ddim_xa_rerun"
+EXPERIMENT_DIRECTORY = "runs/run_8_large_t5_efficient"
 
 ACCUMULATION_STEPS = 1
 
@@ -58,7 +58,7 @@ metric = FrechetInceptionDistance(device="cpu") # NotImplementedError: The opera
 epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
-net = UNet_conditional(num_classes=768)
+net = UNet_conditional_efficient(num_classes=1024)
 print(net)
 #net.load_state_dict(torch.load(f"runs/run_3_jxa/ckpt/latest.pt"))
 if RESUME > 0:
