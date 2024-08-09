@@ -149,6 +149,7 @@ Aug 5
 
 Aug 8
 
+MENTOR MEETING
 Thoughts:
 
 Revisit if discouraged:
@@ -169,3 +170,8 @@ Do now in order:
 ok coding.
 
 -
+
+Aug 9:
+
+- Coded up the efficient design and made it lager by increasing start depth and adding another layer of depth. Switched bert to t5 large.
+- Old architecture at v2_architecture, old traininer at v2_trainer.

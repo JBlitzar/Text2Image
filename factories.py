@@ -124,7 +124,7 @@ class DoubleConv(nn.Module):
 
 
 class Down(nn.Module):
-    def __init__(self, in_channels, out_channels, emb_dim=256):
+    def __init__(self, in_channels, out_channels, emb_dim=1024):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
             nn.MaxPool2d(2),
@@ -147,7 +147,7 @@ class Down(nn.Module):
 
 
 class Up(nn.Module):
-    def __init__(self, in_channels, out_channels, emb_dim=256):
+    def __init__(self, in_channels, out_channels, emb_dim=1024):
         super().__init__()
 
         self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
@@ -173,8 +173,8 @@ class Up(nn.Module):
 
 
 
-class UNet_conditional(nn.Module):
-    def __init__(self, c_in=3, c_out=3, time_dim=256, num_classes=None, context_dim=None, device="mps"):
+class UNet_conditional_large(nn.Module):
+    def __init__(self, c_in=3, c_out=3, time_dim=1024, num_classes=1024, context_dim=None, device="mps"):
         super().__init__()
 
         if context_dim is None:
@@ -183,42 +183,42 @@ class UNet_conditional(nn.Module):
         self.time_dim = time_dim
 
 
-        start_depth = 256 # fat boy
-
-        self.inc = DoubleConv(c_in, start_depth) 
-        
-
-        self.down1 = Down(start_depth, 2 * start_depth)  
-        self.xa1 = CrossAttention(2 * start_depth, start_depth // 2, context_dim)
-
-        self.down2 = Down(2 * start_depth, 4 * start_depth) 
-        self.xa2 = CrossAttention(4 * start_depth, start_depth // 4, context_dim)
-
-        self.down3 = Down(4 * start_depth, 4 * start_depth)  
-        self.xa3 = CrossAttention(4 * start_depth, start_depth // 8, context_dim)
-
-        self.down4 = Down(4 * start_depth, 4 * start_depth)  
-        self.xa4 = CrossAttention(4 * start_depth, start_depth // 16, context_dim)
-
-        self.bot1 = DoubleConv(4 * start_depth, 8 * start_depth) 
-        self.bot2 = DoubleConv(8 * start_depth, 8 * start_depth) 
-        self.bot3 = DoubleConv(8 * start_depth, 4 * start_depth) 
+        start_depth = 128
 
 
-        self.up1 = Up(8 * start_depth, 4 * start_depth)  
-        self.xa5 = CrossAttention(4 * start_depth, start_depth // 8, context_dim)
+        xa_amt_depth = 64 # dont change
 
+        self.inc = DoubleConv(c_in, start_depth)
+        self.down1 = Down(start_depth, start_depth * 2)
 
-        self.up2 = Up(8 * start_depth, 2 * start_depth) 
-        self.xa6 = CrossAttention(2 * start_depth, start_depth // 4, context_dim)
+        self.xa1 = CrossAttention(start_depth * 2, xa_amt_depth // 2, context_dim)
 
-        self.up3 = Up(4 * start_depth, start_depth)  
-        self.xa7 = CrossAttention(start_depth, start_depth // 2, context_dim)
+        self.down2 = Down(start_depth * 2, start_depth * 4)
+        self.xa2 = CrossAttention(start_depth * 4, xa_amt_depth // 4, context_dim)
 
-        self.up4 = Up(2 * start_depth, start_depth)  
-        self.xa8 = CrossAttention(start_depth, start_depth, context_dim)  
+        self.down3 = Down(start_depth * 4, start_depth * 8)
+        self.xa3 = CrossAttention(start_depth * 8, xa_amt_depth // 8, context_dim)
 
-        self.outc = nn.Conv2d(start_depth, c_out, kernel_size=1)  
+        self.down4 = Down(start_depth * 8, start_depth * 8)
+        self.xa4 = CrossAttention(start_depth * 8, xa_amt_depth // 16, context_dim)
+
+        self.bot1 = DoubleConv(start_depth * 8, start_depth * 16)
+        self.bot2 = DoubleConv(start_depth * 16, start_depth * 16)
+        self.bot3 = DoubleConv(start_depth * 16, start_depth * 8)
+
+        self.up1 = Up(start_depth * 16, start_depth * 4)
+        self.xa5 = CrossAttention(start_depth * 4, xa_amt_depth // 8, context_dim)
+
+        self.up2 = Up(start_depth * 8, start_depth * 2)
+        self.xa6 = CrossAttention(start_depth * 2, xa_amt_depth // 4, context_dim)
+
+        self.up3 = Up(start_depth * 4, start_depth)
+        self.xa7 = CrossAttention(start_depth, xa_amt_depth // 2, context_dim)
+
+        self.up4 = Up(start_depth * 2, start_depth)
+        self.xa8 = CrossAttention(start_depth, xa_amt_depth, context_dim)
+
+        self.outc = nn.Conv2d(start_depth, c_out, kernel_size=1)
 
         if num_classes is not None:
             self.label_emb = nn.Linear(num_classes, time_dim)#Embedding(num_classes, time_dim)
@@ -260,50 +260,185 @@ class UNet_conditional(nn.Module):
 
         x2 = self.down1(x1, t)
         x2 = self.xa1(x2, attn_y)
-        #x2 = self.sa1(x2)
+
 
         x3 = self.down2(x2, t)
         x3 = self.xa2(x3, attn_y)
-        #x3 = self.sa2(x3)
+
 
         x4 = self.down3(x3, t)
+
         x4 = self.xa3(x4, attn_y)
-        #x4 = self.sa3(x4)
 
 
-        x5 = self.down4(x3, t)
+        x5 = self.down4(x4, t)
+
         x5 = self.xa4(x5, attn_y)
+
+
 
         x5 = self.bot1(x5)
         x5 = self.bot2(x5)
         x5 = self.bot3(x5)
 
 
+
         x = self.up1(x5, x4, t)
-        x = self.xa4(x,attn_y)
-        #x = self.sa4(x)
+        x = self.xa5(x,attn_y)
+
 
         x = self.up2(x, x3, t)
-        x = self.xa5(x, attn_y)
-        #x = self.sa5(x)
+        x = self.xa6(x,attn_y)
 
         x = self.up3(x, x2, t)
-        x = self.xa6(x, attn_y)
+        x = self.xa7(x, attn_y)
+
 
         x = self.up4(x, x1, t)
-        x = self.xa7(x, attn_y)
-        #x = self.sa6(x)
+        x = self.xa8(x, attn_y)
+
         output = self.outc(x)
-
-
-
-        #output = F.sigmoid(x)
         return output
 
+class UNet_conditional_efficient(nn.Module):
+    def __init__(self, c_in=3, c_out=3, time_dim=1024, num_classes=1024, context_dim=None, device="mps"):
+        super().__init__()
 
+        if context_dim is None:
+            context_dim = num_classes
+        self.device = device
+        self.time_dim = time_dim
+
+
+        start_depth = 128
+
+
+        xa_amt_depth = 64 # dont change
+
+        self.inc = DoubleConv(c_in, start_depth * 2)
+
+        self.downsample = nn.MaxPool2d(2)
+
+        
+        self.down2 = Down(start_depth * 2, start_depth * 4)
+        self.xa2 = CrossAttention(start_depth * 4, xa_amt_depth // 4, context_dim)
+
+        self.down3 = Down(start_depth * 4, start_depth * 8)
+        self.xa3 = CrossAttention(start_depth * 8, xa_amt_depth // 8, context_dim)
+
+        self.down4 = Down(start_depth * 8, start_depth * 8)
+        self.xa4 = CrossAttention(start_depth * 8, xa_amt_depth // 16, context_dim)
+
+        self.bot1 = DoubleConv(start_depth * 8, start_depth * 16)
+        self.bot2 = DoubleConv(start_depth * 16, start_depth * 16)
+        self.bot3 = DoubleConv(start_depth * 16, start_depth * 8)
+
+        self.up1 = Up(start_depth * 16, start_depth * 4)
+        self.xa5 = CrossAttention(start_depth * 4, xa_amt_depth // 8, context_dim)
+
+        self.up2 = Up(start_depth * 8, start_depth * 2)
+        self.xa6 = CrossAttention(start_depth * 2, xa_amt_depth // 4, context_dim)
+
+        self.up3 = Up(start_depth * 4, start_depth)
+        self.xa7 = CrossAttention(start_depth, xa_amt_depth // 2, context_dim)
+
+        self.up4 = Up(start_depth * 2, start_depth)
+        self.xa8 = CrossAttention(start_depth, xa_amt_depth, context_dim)
+
+        self.upsample = nn.Upsample(scale_factor=2, mode="bilinear")
+
+        self.outc = nn.Conv2d(start_depth, c_out, kernel_size=1)
+
+        if num_classes is not None:
+            self.label_emb = nn.Linear(num_classes, time_dim)#Embedding(num_classes, time_dim)
+            self.num_classes = num_classes
+            if context_dim is None:
+                context_dim = num_classes
+
+            self.context_dim = context_dim
+
+            self.label_crossattn_emb = nn.Linear(num_classes, context_dim)
+
+    def pos_encoding(self, t, channels):
+        inv_freq = 1.0 / (
+            10000
+            ** (torch.arange(0, channels, 2, device=self.device).float() / channels)
+        )
+        pos_enc_a = torch.sin(t.repeat(1, channels // 2) * inv_freq)
+        pos_enc_b = torch.cos(t.repeat(1, channels // 2) * inv_freq)
+        pos_enc = torch.cat([pos_enc_a, pos_enc_b], dim=-1)
+        return pos_enc
+
+    def forward(self, x, t, y):
+        t = t.unsqueeze(-1).type(torch.float)
+        t = self.pos_encoding(t, self.time_dim)
+
+        if y is not None:
+
+            attn_y = y[:,:self.num_classes]
+            attn_y = self.label_crossattn_emb(attn_y)
+
+            # y = y[:,:self.num_classes]
+
+            # y = self.label_emb(y)
+
+
+            # t += y
+
+        x1 = self.inc(x)
+
+        x2 = self.downsample(x1)
+
+       
+
+
+
+
+        x3 = self.down2(x2, t)
+        x3 = self.xa2(x3, attn_y)
+
+
+        x4 = self.down3(x3, t)
+
+        x4 = self.xa3(x4, attn_y)
+
+
+        x5 = self.down4(x4, t)
+
+        x5 = self.xa4(x5, attn_y)
+
+
+
+        x5 = self.bot1(x5)
+        x5 = self.bot2(x5)
+        x5 = self.bot3(x5)
+
+
+
+        x = self.up1(x5, x4, t)
+        x = self.xa5(x,attn_y)
+
+
+        x = self.up2(x, x3, t)
+        x = self.xa6(x,attn_y)
+
+        x = self.up3(x, x2, t)
+        x = self.xa7(x, attn_y)
+
+
+
+
+       
+        x = self.upsample(x)
+        output = self.outc(x)
+        return output
 
 if __name__ == "__main__":
-    net = UNet_conditional(num_classes=1024).to("mps")
+    net = UNet_conditional_efficient(num_classes=1024).to("mps")
+
+    def count_parameters(model):
+        return torch.tensor([p.numel() for p in model.parameters() if p.requires_grad]).sum().item()
+    print(f"Parameters: {count_parameters(net)}")
 
     minibatch = torch.randn((1,3,64,64)).to("mps")
 
