@@ -147,6 +147,8 @@ Aug 5
 - Well, ddim run didn't really work.
 - Panic that inference didn't work, resolved by commenting out a sigmoid
 
+Aug 8
+
 Thoughts:
 
 Revisit if discouraged:
@@ -163,3 +165,7 @@ Do now in order:
 - Read imagen paper? we are basically replicating that workflow
 - p0 https://arxiv.org/pdf/2205.11487 4.4 we need a bigger text encoder? Get a really big bert or try to get t5
 - p0 "efficient" design means to slap downsample/upsample on either end of the unet because less parameters
+
+ok coding.
+
+-
