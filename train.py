@@ -20,9 +20,9 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_8_large_t5_efficient"
+EXPERIMENT_DIRECTORY = "runs/run_8_large_t5_efficient_batch"
 
-ACCUMULATION_STEPS = 1
+ACCUMULATION_STEPS = 8
 
 
 
@@ -132,11 +132,10 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
 
     metric.reset()
-    #optimizer.zero_grad()
+    optimizer.zero_grad()
     for step, (batch, label, _) in enumerate(pbar := tqdm(dataloader, dynamic_ncols=True)):
         epoch_step_metric.reset()
 
-        optimizer.zero_grad()
 
         loss = wrapper.training_loop_iteration(batch, label, criterion)
 
@@ -147,15 +146,13 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
         num_runs += 1
 
 
-        #optimizer.step()
         last_batch = batch[0].detach().cpu()
 
 
         pbar.set_description(f"Loss: {'%.4f' % loss}")
         
-        # if step % ACCUMULATION_STEPS == ACCUMULATION_STEPS - 1:
-        #     optimizer.step()
-        #     optimizer.zero_grad()
+        if step % ACCUMULATION_STEPS == ACCUMULATION_STEPS - 1:
+            optimizer.zero_grad()
 
 
 
@@ -184,8 +181,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
 
     # # just in case
-    # optimizer.step()
-    # optimizer.zero_grad()
+    optimizer.zero_grad()
     
     
 
