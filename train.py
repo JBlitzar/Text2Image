@@ -139,8 +139,6 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
         loss = wrapper.training_loop_iteration(batch, label, criterion)
 
-        optimizer.step()
-
         running_total += loss
         
         num_runs += 1
@@ -152,6 +150,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
         pbar.set_description(f"Loss: {'%.4f' % loss}")
         
         if step % ACCUMULATION_STEPS == ACCUMULATION_STEPS - 1:
+            optimizer.step()
             optimizer.zero_grad()
 
 
@@ -181,6 +180,7 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
 
 
     # # just in case
+    optimizer.step()
     optimizer.zero_grad()
     
     
