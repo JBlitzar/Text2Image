@@ -60,7 +60,7 @@ epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 net = UNet_conditional_efficient(num_classes=1024)
 print(net)
-# net.load_state_dict(torch.load(f"runs/run_3_jxa/ckpt/latest.pt"))
+#net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
 
