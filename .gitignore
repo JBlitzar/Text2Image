@@ -166,3 +166,4 @@ runs/run_6_ddim_xa/ckpt/latest.pt
 /runs/run_8_large_t5_efficient/ckpt
 /runs/run_8_large_t5_efficient_batch/ckpt
 /runs/run_8_large_t5_efficient_batch_implicit/ckpt
+/runs/run_8_start_depth_xa/ckpt
