@@ -180,3 +180,7 @@ Aug 9:
 - Python isnt actually using much more memory than before, however eta for an epoch is 2 hours (double) which is understandable, given 12x model size lol.
 - Well, now we let it train for 3 days and wait I guess.
 - Loss 0.03 after 2k steps
+
+Aug 11:
+
+- Just increased start_depth, paused all other ones, and super promising! Interesting stuff even at epoch 4. ~2h epochs, 97m parameter model. `run_8_start_depth_xa`.
