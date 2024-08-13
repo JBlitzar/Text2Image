@@ -259,14 +259,14 @@ class ImagenUnet(nn.Module):
 
 
         if num_classes is not None:
-            self.label_emb = nn.Linear(num_classes, time_dim)#Embedding(num_classes, time_dim)
+            self.label_emb = nn.Sequential(nn.Linear(num_classes, time_dim), nn.SiLU())#Embedding(num_classes, time_dim)
             self.num_classes = num_classes
             if context_dim is None:
                 context_dim = num_classes
 
             self.context_dim = context_dim
 
-            self.label_crossattn_emb = nn.Linear(num_classes, context_dim)
+            self.label_crossattn_emb = nn.Sequential(nn.Linear(num_classes, context_dim), nn.SiLU())
 
     def pos_encoding(self, t, channels):
         inv_freq = 1.0 / (
