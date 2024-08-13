@@ -184,3 +184,4 @@ Aug 9:
 Aug 11:
 
 - Just increased start_depth, paused all other ones, and super promising! Interesting stuff even at epoch 4. ~2h epochs, 97m parameter model. `run_8_start_depth_xa`.
+- Good results, losses are abt the same :\, but cool none the less.
