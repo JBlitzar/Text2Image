@@ -5,7 +5,8 @@ import os
 import glob
 from PIL import Image
 import tqdm
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, RandomSampler
+from torch.utils.data import ConcatDataset, random_split
 # flowers = load_dataset("pranked03/flowers-blip-captions")
 # birds = load_dataset("anjunhu/naively_captioned_CUB2002011_test_20shot")
 #flowers.set_format(type="torch", columns=["text", "image"])
@@ -89,10 +90,32 @@ class FlowersDataset(torch.utils.data.Dataset):
         return annotation, image
 
 
-def get_train_dataset():
+def get_train_test_datasets(train_split=0.8):
+    # Load the datasets
     flowers = FlowersDataset(root=os.path.expanduser("~/torch_datasets/flowers-full"))
     birds = BirdsDataset("Multimodal-Fatima/CUB_train")
-    return torch.utils.data.ConcatDataset([flowers, birds])
+    
+    # Combine the datasets
+    combined_dataset = ConcatDataset([flowers, birds])
+    
+    # Calculate the split lengths
+    train_len = int(len(combined_dataset) * train_split)
+    test_len = len(combined_dataset) - train_len
+    
+    # Randomly split the combined dataset into train and test sets
+    train_dataset, test_dataset = random_split(combined_dataset, [train_len, test_len])
+    
+    return train_dataset, test_dataset
+trainset, testset = get_train_test_datasets()
+def get_train_dataset():
+    return trainset
+def get_random_test_data(amount=1):
+
+    sampler = RandomSampler(testset)
+
+    randomloader = DataLoader(testset, sampler=sampler, batch_size=amount)
+
+    return next(iter(randomloader))
 
 def get_dataloader(dataset, batch_size=64):
 

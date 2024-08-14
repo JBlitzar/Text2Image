@@ -1,6 +1,7 @@
-from factories import UNet_conditional_efficient, UNet_conditional_start_depth
+from v2_architecture import UNet_conditional
 import re
-from dataset import get_train_dataset, get_dataloader, get_random_test_data
+#from dataset import get_train_dataset, get_dataloader, get_random_test_data
+from birds_flowers_dataset import get_train_dataset, get_dataloader, get_random_test_data
 import torch
 from tqdm import tqdm, trange
 from logger import log_data, init_logger, log_img, save_grid_with_label
@@ -20,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_8_start_depth_xa"
+EXPERIMENT_DIRECTORY = "runs/run_9_flowers_birds"
 
 ACCUMULATION_STEPS = 1
 
@@ -58,7 +59,7 @@ metric = FrechetInceptionDistance(device="cpu") # NotImplementedError: The opera
 epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
-net = UNet_conditional_start_depth(num_classes=1024)
+net = UNet_conditional(num_classes=768)
 print(net)
 #net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
 if RESUME > 0:
