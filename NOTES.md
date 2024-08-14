@@ -202,3 +202,4 @@ Aug 14:
 
 - What? Trained birds flowers, and results are terrible after 50 epochs, and FID is set to 0??
 - I will _try_ another 50 epochs
+- I'll owe it to less data. 50 epochs is the equivalent in training steps to 7 coco epochs.
