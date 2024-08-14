@@ -11,7 +11,7 @@ from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 0
+RESUME = 50
 
 
 IS_TEMP = False

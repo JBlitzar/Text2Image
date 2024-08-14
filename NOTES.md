@@ -197,3 +197,7 @@ TODO this week:
 Generally, https://textvqa.org/textcaps/dataset/ textcaps
 
 Subset CC? https://huggingface.co/datasets/google-research-datasets/conceptual_captions
+
+Aug 14:
+
+- What? Trained birds flowers, and results are terrible after 50 epochs, and FID is set to 0??
