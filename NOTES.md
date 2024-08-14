@@ -185,3 +185,15 @@ Aug 11:
 
 - Just increased start_depth, paused all other ones, and super promising! Interesting stuff even at epoch 4. ~2h epochs, 97m parameter model. `run_8_start_depth_xa`.
 - Good results, losses are abt the same :\, but cool none the less.
+
+TODO this week:
+
+- Get a simple toy dataset
+- Something that is t2i but also two very different things (like cars and frogs)
+- Cub might be good, it mighrt just make a bunch of blurry bird blobs.
+- Combine two datasets? (CUB and stanford cars)
+- Bingo! oxford flowers and CUB birds.
+
+Generally, https://textvqa.org/textcaps/dataset/ textcaps
+
+Subset CC? https://huggingface.co/datasets/google-research-datasets/conceptual_captions

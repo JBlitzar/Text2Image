@@ -10,115 +10,6 @@ import torch.nn.functional as F
 import numpy as np
 
 
-from torch import einsum # Lucidrain implementation imports ig
-from einops import rearrange, repeat, reduce, pack, unpack
-from einops.layers.torch import Rearrange
-
-class LayerNorm(nn.Module):
-    def __init__(self, feats, stable = False, dim = -1):
-        super().__init__()
-        self.stable = stable
-        self.dim = dim
-
-        self.g = nn.Parameter(torch.ones(feats, *((1,) * (-dim - 1))))
-
-    def forward(self, x):
-        dtype, dim = x.dtype, self.dim
-
-        if self.stable:
-            x = x / x.amax(dim = dim, keepdim = True).detach()
-
-        eps = 1e-5 if x.dtype == torch.float32 else 1e-3
-        var = torch.var(x, dim = dim, unbiased = False, keepdim = True)
-        mean = torch.mean(x, dim = dim, keepdim = True)
-
-        return (x - mean) * (var + eps).rsqrt().type(dtype) * self.g.type(dtype)
-
-def default(val, d):
-    if val is not None:
-        return val
-    return d() if callable(d) else d
-
-def l2norm(t):
-    return F.normalize(t, dim = -1)
-
-
-class CrossAttention(nn.Module):
-    def __init__(self, channels, size, context_dim):
-        super(CrossAttention, self).__init__()
-        self.channels = channels
-        self.size = size
-        self.context_dim = context_dim
-        self.heads = 8
-        self.dim_head = channels // self.heads
-
-        self.norm = LayerNorm(channels)
-        self.context_ln = LayerNorm(context_dim)
-
-        self.null_kv = nn.Parameter(torch.randn(2, self.dim_head))
-
-        self.to_q = nn.Linear(channels, self.dim_head * self.heads, bias=False)
-        self.to_kv = nn.Linear(channels, self.dim_head * self.heads * 2, bias=False)
-
-        self.q_scale = nn.Parameter(torch.ones(self.dim_head))
-        self.k_scale = nn.Parameter(torch.ones(self.dim_head))
-
-        self.ff_self = nn.Sequential(
-            LayerNorm(channels),
-            nn.Linear(channels, channels),
-            nn.SiLU(),
-            nn.Linear(channels, channels),
-        )
-
-        self.context_proj = nn.Linear(context_dim, channels)  # Match context projection to channels
-
-    def forward(self, x, context):
-        batch_size, channels, height, width = x.size()
-
-        # Flatten the spatial dimensions and apply layer normalization
-        x = x.view(batch_size, channels, -1).transpose(1, 2)  # (batch_size, height * width, channels)
-        x_ln = self.norm(x)
-
-        # Project context and normalize
-        context = self.context_proj(context)
-        context_ln = self.context_ln(context)
-        context_ln = context_ln.unsqueeze(1).expand(-1, x_ln.size(1), -1)
-
-        # Compute query, key, and value
-        q = self.to_q(x_ln)
-        kv = self.to_kv(context_ln).view(batch_size, -1, self.heads, self.dim_head * 2)
-        k, v = kv.chunk(2, dim=-1)
-
-        # Add null key/value for classifier-free guidance
-        nk, nv = [self.null_kv[i].unsqueeze(0).unsqueeze(0).expand(batch_size, self.heads, -1, -1) for i in range(2)]
-        k = torch.cat((nk, k), dim=2)
-        v = torch.cat((nv, v), dim=2)
-
-        # Normalize q and k
-        q, k = map(lambda t: t.view(batch_size, -1, self.heads, self.dim_head).transpose(1, 2), (q, k))
-        q, k = map(l2norm, (q, k))
-        q = q * self.q_scale
-        k = k * self.k_scale
-
-        # Calculate attention
-        sim = torch.einsum('b h i d, b h j d -> b h i j', q, k) * (self.dim_head ** -0.5)
-        attn = sim.softmax(dim=-1)
-
-        # Apply attention to value
-        v = v.view(batch_size, self.heads, -1, self.dim_head)
-        out = torch.einsum('b h i j, b h j d -> b h i d', attn, v).transpose(1, 2).reshape(batch_size, -1, channels)
-        out = out + x_ln
-        out = self.ff_self(out) + out
-
-        # Reshape back to the original spatial dimensions
-        return out.transpose(1, 2).view(batch_size, channels, height, width)
-
-
-    
-
-
-# ======== End lucidrain stuff
-
 
 class SeamlessDenseLayer(nn.Module):
     def __init__(self, input_size, output_size):
@@ -197,51 +88,51 @@ class SelfAttention(nn.Module):
         return attention_value.swapaxes(2, 1).view(-1, self.channels, self.size, self.size)
     
 
-# class CrossAttention(nn.Module):
-#     def __init__(self, channels, size, context_dim):
-#         super(CrossAttention, self).__init__()
-#         self.channels = channels
-#         self.size = size
-#         self.context_dim = context_dim
-#         self.mha = nn.MultiheadAttention(channels, 8, batch_first=True)
-#         self.ln = nn.LayerNorm(channels)
-#         self.context_ln = nn.LayerNorm(channels)
-#         self.ff_self = nn.Sequential(
-#             nn.LayerNorm(channels),
-#             nn.Linear(channels, channels),
-#             nn.SiLU(),
-#             nn.Linear(channels, channels),
-#         )
+class CrossAttention(nn.Module):
+    def __init__(self, channels, size, context_dim):
+        super(CrossAttention, self).__init__()
+        self.channels = channels
+        self.size = size
+        self.context_dim = context_dim
+        self.mha = nn.MultiheadAttention(channels, 8, batch_first=True)
+        self.ln = nn.LayerNorm(channels)
+        self.context_ln = nn.LayerNorm(channels)
+        self.ff_self = nn.Sequential(
+            nn.LayerNorm(channels),
+            nn.Linear(channels, channels),
+            nn.SiLU(),
+            nn.Linear(channels, channels),
+        )
 
 
-#         self.context_proj = nn.Linear(context_dim, channels)
+        self.context_proj = nn.Linear(context_dim, channels)
 
-#     def forward(self, x, context):
+    def forward(self, x, context):
         
-#         # Reshape and permute x for multi-head attention
-#         batch_size, channels, height, width = x.size()
+        # Reshape and permute x for multi-head attention
+        batch_size, channels, height, width = x.size()
 
-#         x = x.view(-1, self.channels, self.size * self.size).swapaxes(1,2)
-#         x_ln = self.ln(x)
+        x = x.view(-1, self.channels, self.size * self.size).swapaxes(1,2)
+        x_ln = self.ln(x)
 
-#         # Expand context to match the sequence length of x
-#         context = self.context_proj(context)
+        # Expand context to match the sequence length of x
+        context = self.context_proj(context)
 
-#         context = context.unsqueeze(1).expand(-1, x_ln.size(1), -1)
+        context = context.unsqueeze(1).expand(-1, x_ln.size(1), -1)
 
-#         context_ln = self.context_ln(context)
+        context_ln = self.context_ln(context)
 
         
 
 
 
-#         # Apply cross-attention
-#         attention_value, _ = self.mha(x_ln, context_ln, context_ln)
-#         attention_value = attention_value + x
-#         attention_value = self.ff_self(attention_value) + attention_value
+        # Apply cross-attention
+        attention_value, _ = self.mha(x_ln, context_ln, context_ln)
+        attention_value = attention_value + x
+        attention_value = self.ff_self(attention_value) + attention_value
 
-#         # Reshape and permute back to the original format
-#         return attention_value.permute(0, 2, 1).view(batch_size, channels, height, width)
+        # Reshape and permute back to the original format
+        return attention_value.permute(0, 2, 1).view(batch_size, channels, height, width)
     
 
 
