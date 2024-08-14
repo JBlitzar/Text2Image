@@ -7,6 +7,14 @@ from PIL import Image
 import tqdm
 from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.data import ConcatDataset, random_split
+
+
+#from t5_vectorize import vectorize_text_with_t5 as vectorize
+from bert_vectorize import vectorize_text_with_bert as vectorize
+#from clip_vectorize import vectorize_text_with_clip as vectorize
+
+
+
 # flowers = load_dataset("pranked03/flowers-blip-captions")
 # birds = load_dataset("anjunhu/naively_captioned_CUB2002011_test_20shot")
 #flowers.set_format(type="torch", columns=["text", "image"])
@@ -44,11 +52,15 @@ class BirdsDataset(torch.utils.data.Dataset):
         text = text[torch.randint(0, len(text), (1,)).item()]
 
         image = item["image"]
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
 
         if self.transform is not None:
             image = self.transform(image)
 
-        return text, image
+        vtext = vectorize(text)
+
+        return image, vtext, text
     
 
 class FlowersDataset(torch.utils.data.Dataset):
@@ -69,7 +81,9 @@ class FlowersDataset(torch.utils.data.Dataset):
 
             img_id = os.path.splitext(os.path.basename(ann_path))[0]
             img_path = os.path.join(self.imgs_dir, f"{img_id}.jpg")
-            image = Image.open(img_path).convert("RGB")
+            image = Image.open(img_path)
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
             
             
             
@@ -87,7 +101,10 @@ class FlowersDataset(torch.utils.data.Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return annotation, image
+
+        vannotation = vectorize(annotation)
+
+        return image, vannotation, annotation
 
 
 def get_train_test_datasets(train_split=0.8):
@@ -130,12 +147,19 @@ if __name__ == "__main__":
     bird = birds[200]
 
     def examine(sample):
-        t, i = sample
+        i, v,t = sample
+        print(v.shape)
         print(t)
         print(i.shape)
+        
         print(torch.max(i))
         print(torch.min(i))
         print(torch.mean(i))
 
     examine(flower)
     examine(bird)
+
+
+    print(get_random_test_data(amount=10)[-1])
+
+
