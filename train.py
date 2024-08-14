@@ -72,7 +72,7 @@ net.to(device)
 wrapper = DiffusionManager(net, device=device, noise_steps=1000) # ImplicitDiffusionManager(net, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
 
-EPOCHS = 50
+EPOCHS = 100
 if IS_TEMP:
     EPOCHS = 5
 learning_rate = 3e-4
