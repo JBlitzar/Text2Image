@@ -5,6 +5,7 @@ import os
 import glob
 from PIL import Image
 import tqdm
+from torch.utils.data import DataLoader
 # flowers = load_dataset("pranked03/flowers-blip-captions")
 # birds = load_dataset("anjunhu/naively_captioned_CUB2002011_test_20shot")
 #flowers.set_format(type="torch", columns=["text", "image"])
@@ -88,16 +89,18 @@ class FlowersDataset(torch.utils.data.Dataset):
         return annotation, image
 
 
+def get_train_dataset():
+    flowers = FlowersDataset(root=os.path.expanduser("~/torch_datasets/flowers-full"))
+    birds = BirdsDataset("Multimodal-Fatima/CUB_train")
+    return torch.utils.data.ConcatDataset([flowers, birds])
 
-flowers = FlowersDataset(root=os.path.expanduser("~/torch_datasets/flowers-full"))
+def get_dataloader(dataset, batch_size=64):
 
-
-
-birds = BirdsDataset("Multimodal-Fatima/CUB_train")
-
-
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":
+    flowers = FlowersDataset(root=os.path.expanduser("~/torch_datasets/flowers-full"))
+    birds = BirdsDataset("Multimodal-Fatima/CUB_train")
     print(len(flowers))
     print(len(birds))
     flower = flowers[200]
