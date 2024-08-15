@@ -11,7 +11,7 @@ from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 100
+RESUME = 0
 
 
 IS_TEMP = False
@@ -21,7 +21,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_9_flowers_birds"
+EXPERIMENT_DIRECTORY = "runs/run_10_flowers_birds"
 
 ACCUMULATION_STEPS = 1
 
