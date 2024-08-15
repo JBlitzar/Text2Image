@@ -48,8 +48,12 @@ class BirdsDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx: int):
         item = self._interalds[idx]
 
-        text = item["description"].split("\n")
-        text = text[torch.randint(0, len(text), (1,)).item()]
+        text_lines = item["description"].split("\n")
+        text = ""
+        while not text.strip():
+            text = text_lines[torch.randint(0, len(text_lines), (1,)).item()]
+        #text = text[torch.randint(0, len(text), (1,)).item()]
+
 
         image = item["image"]
         if image.mode != 'RGB':
@@ -145,6 +149,7 @@ if __name__ == "__main__":
     print(len(birds))
     flower = flowers[200]
     bird = birds[200]
+
 
     def examine(sample):
         i, v,t = sample
