@@ -11,7 +11,7 @@ from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 50
+RESUME = 100
 
 
 IS_TEMP = False
@@ -72,7 +72,7 @@ net.to(device)
 wrapper = DiffusionManager(net, device=device, noise_steps=1000) # ImplicitDiffusionManager(net, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
 
-EPOCHS = 100
+EPOCHS = 150
 if IS_TEMP:
     EPOCHS = 5
 learning_rate = 3e-4
