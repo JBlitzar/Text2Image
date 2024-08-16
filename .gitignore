@@ -168,3 +168,4 @@ runs/run_6_ddim_xa/ckpt/latest.pt
 /runs/run_8_large_t5_efficient_batch_implicit/ckpt
 /runs/run_8_start_depth_xa/ckpt
 /runs/run_9_flowers_birds/ckpt
+/runs/run_10_flowers_birds/ckpt
