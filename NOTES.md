@@ -207,3 +207,29 @@ Aug 14:
 Aug 15:
 
 - Training the birds wasnt great, also because I realized some of the dataset had empty labels. uh oh! Fixed that.
+
+Aug 20:
+
+So many parameters, try to force it to overfit. Overfit by training it longer. Remove regularizers (groupnorms?)
+
+Even less data!
+One type of flower.
+
+Just flowers, 100 images
+
+Data aug
+Ablation
+Hyperparameter tunign
+More data augmentation
+caption aug.
+Classifier free guidance
+More training?
+How can we find a testable bottleneck
+Feature maps
+Try without skips
+See the gradient updates
+
+Todo:
+
+if I can get it to overfit, that proves that it can learn, maybe just train it for longer
+If it can't overfit, something has gone wrong. Wow fun

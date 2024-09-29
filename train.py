@@ -1,7 +1,8 @@
 from v2_architecture import UNet_conditional
+from torchinfo import summary
 import re
 #from dataset import get_train_dataset, get_dataloader, get_random_test_data
-from birds_flowers_dataset import get_train_dataset, get_dataloader, get_random_test_data
+from flowers_subset import get_train_dataset, get_dataloader, get_random_test_data
 import torch
 from tqdm import tqdm, trange
 from logger import log_data, init_logger, log_img, save_grid_with_label
@@ -11,7 +12,7 @@ from torcheval.metrics import FrechetInceptionDistance
 import os
 os.system(f"caffeinate -is -w {os.getpid()} &")
 
-RESUME = 55
+RESUME = 0
 
 
 IS_TEMP = False
@@ -21,7 +22,7 @@ if IS_TEMP:
 
 
 
-EXPERIMENT_DIRECTORY = "runs/run_10_flowers_birds"
+EXPERIMENT_DIRECTORY = "runs/run_11_flowers_subset"
 
 ACCUMULATION_STEPS = 1
 
@@ -60,7 +61,7 @@ epoch_step_metric = FrechetInceptionDistance(device="cpu")
 
 
 net = UNet_conditional(num_classes=768)
-print(net)
+
 #net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
 if RESUME > 0:
     net.load_state_dict(torch.load(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt"))
@@ -69,10 +70,11 @@ if RESUME > 0:
 net.to(device)
 
 
+summary(net, [(16, 3,64, 64),(16,),(16,768)],device=device)
 wrapper = DiffusionManager(net, device=device, noise_steps=1000) # ImplicitDiffusionManager(net, device=device, noise_steps=1000)
 wrapper.set_schedule(Schedule.LINEAR)
 
-EPOCHS = 150
+EPOCHS = 500
 if IS_TEMP:
     EPOCHS = 5
 learning_rate = 3e-4
@@ -199,9 +201,9 @@ for epoch in trange(EPOCHS, dynamic_ncols=True):
         with open(f"{EXPERIMENT_DIRECTORY}/ckpt/latest.pt", "wb+") as f:
             torch.save(net.state_dict(),f)
     
-    if epoch % 1 == 0:
+    if epoch % 10 == 9:
        generate_sample_save_images(f"epoch_{epoch}.png")
 
-    if epoch % 10 == 0 :
+    if epoch % 100 == 0 :
         with open(f"{EXPERIMENT_DIRECTORY}/ckpt/epoch_{epoch}.pt", "wb+") as f:
             torch.save(net.state_dict(),f)

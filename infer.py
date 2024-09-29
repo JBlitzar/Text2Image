@@ -1,4 +1,4 @@
-from factories import UNet_conditional
+from jxa_factory import UNet_conditional
 from wrapper import DiffusionManager, Schedule
 import os
 import re
@@ -8,6 +8,7 @@ import time
 import torchvision
 from logger import save_grid_with_label
 from clip_score import select_top_n_images
+from torchinfo import summary
 
 
 
@@ -22,9 +23,12 @@ except:
 net = UNet_conditional(num_classes=768)
 net.to(device)
 net.load_state_dict(torch.load(os.path.join(EXPERIMENT_DIRECTORY, "ckpt/latest.pt")))
+
+
 def count_parameters(model):
     return torch.tensor([p.numel() for p in model.parameters() if p.requires_grad]).sum().item()
 print(f"Parameters: {count_parameters(net)}")
+
 
 
 wrapper = DiffusionManager(net, device=device, noise_steps=1000)
