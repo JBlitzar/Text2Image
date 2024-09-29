@@ -233,3 +233,5 @@ Todo:
 
 if I can get it to overfit, that proves that it can learn, maybe just train it for longer
 If it can't overfit, something has gone wrong. Wow fun
+
+Sep 29: This project is mostly over. If I get more motivation, I might revive it. I managed to get it up and running on HF spaces! https://huggingface.co/spaces/jblitzar/text-to-image

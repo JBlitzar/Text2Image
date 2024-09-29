@@ -1,5 +1,7 @@
 # Text2Image
 
+# Check out https://huggingface.co/spaces/jblitzar/text-to-image, where the live model is hosted!
+
 Architecture
 
 - Get images, captions
