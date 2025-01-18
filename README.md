@@ -1,6 +1,14 @@
 # Text2Image
 
+<img src="https://github.com/JBlitzar/Text2Image/blob/main/runs/run_3_jxa/featured/epoch_46_step_3999.png">
+
+# More images  [here](https://github.com/JBlitzar/Text2Image/blob/main/runs/run_3_jxa/featured/epoch_46_step_3499.png)
+
+---
+
 # Check out https://huggingface.co/spaces/jblitzar/text-to-image, where the live model is hosted!
+
+---
 
 Architecture
 
